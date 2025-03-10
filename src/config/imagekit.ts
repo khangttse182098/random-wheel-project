@@ -8,3 +8,5 @@ const authenticator = () => {
     resolve({ signature, token, expiry });
   });
 };
+
+

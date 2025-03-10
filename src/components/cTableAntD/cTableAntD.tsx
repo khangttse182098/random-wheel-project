@@ -17,7 +17,7 @@ const AntDCustomTable = <T extends Record<string, T>>({
   columns,
   bordered = true,
   columnFlex = 1,
-  tableColor = "grey",
+  tableColor = "#fdcd08",
   textColor = "white",
 }: AntDComponentProps<T>) => {
   const processedColumns = useMemo(() => {

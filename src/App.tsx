@@ -1,42 +1,46 @@
-import { ColumnType } from "antd/es/table";
-import AntDCustomTable from "./components/cTableAntD/cTableAntD";
-
-const mockData = [
-  {
-    name: "khang",
-    age: 21,
-  },
-  {
-    name: "mile",
-    age: 21,
-  },
-  {
-    name: "nhim",
-    age: 21,
-  },
-  {
-    name: "manh",
-    age: 21,
-  },
-];
-
-const columns: ColumnType[] = [
-  {
-    title: "Tên",
-    dataIndex: "name",
-  },
-  {
-    title: "Tuổi",
-    dataIndex: "age",
-  },
-];
+import { createBrowserRouter, RouterProvider } from "react-router";
+import EventMangement from "./pages/EventMangement/EventMangement";
+import EventSetting from "./pages/EventSetting/EventSetting";
+import PrizeMangement from "./pages/PrizeMangement/PrizeMangement";
+import ContestantList from "./pages/ContestantList/ContestantList";
+import WinnerList from "./pages/WinnerList/WinnerList";
+import HomeLayout from "./layout/HomeLayout/HomeLayout";
+import AccountInfo from "./pages/AccountInfo/AccountInfo";
 
 function App() {
-  return (
-    <div>
-      <AntDCustomTable dataSource={mockData} columns={columns} />
-    </div>
-  );
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <HomeLayout />,
+      children: [
+        {
+          path: "/",
+          element: <EventMangement />,
+        },
+        {
+          path: "/account-info",
+          element: <AccountInfo />,
+        },
+      ],
+    },
+    {
+      path: "/event-setting",
+      element: <EventSetting />,
+    },
+    {
+      path: "/prize-manage",
+      element: <PrizeMangement />,
+    },
+    {
+      path: "/contestant-list",
+      element: <ContestantList />,
+    },
+    {
+      path: "/winner-list",
+      element: <WinnerList />,
+    },
+  ]);
+  return <RouterProvider router={router} />;
 }
 
 export default App;

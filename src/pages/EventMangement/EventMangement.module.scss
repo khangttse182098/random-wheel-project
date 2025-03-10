@@ -1,0 +1,28 @@
+$text-color: #525252;
+
+.container {
+  padding: 0 0.5em;
+}
+.header {
+  font-size: 1.5em;
+  color: $text-color;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.function__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.button__add {
+  padding: 20px;
+  font-size: 1em;
+  color: white;
+}
+
+.search__input {
+  width: 20em;
+}
