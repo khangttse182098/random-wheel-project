@@ -8,7 +8,7 @@ const Header = () => {
       <div className={style["header-content"]}>
         <h1 className={style["header-title"]}>PlusSpin</h1>
         <nav className={style["header-nav"]}>
-          <a href="/" className={style["nav-link"]}>
+          <a href="/event-manage" className={style["nav-link"]}>
             <TfiMenuAlt />
             QUẢN LÝ SỰ KIỆN
           </a>

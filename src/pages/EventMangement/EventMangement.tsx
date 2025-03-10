@@ -29,6 +29,9 @@ const EventMangement = () => {
       title: "Ngày hết hạn",
       dataIndex: "expiry_date",
     },
+    {
+      title: "Chức năng",
+    },
   ];
   return (
     <div className={style["container"]}>

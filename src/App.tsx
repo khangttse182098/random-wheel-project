@@ -6,6 +6,7 @@ import ContestantList from "./pages/ContestantList/ContestantList";
 import WinnerList from "./pages/WinnerList/WinnerList";
 import HomeLayout from "./layout/HomeLayout/HomeLayout";
 import AccountInfo from "./pages/AccountInfo/AccountInfo";
+import EventConfigLayout from "./layout/EventConfigLayout/EventConfigLayout";
 
 function App() {
   const router = createBrowserRouter([
@@ -14,7 +15,7 @@ function App() {
       element: <HomeLayout />,
       children: [
         {
-          path: "/",
+          path: "/event-manage",
           element: <EventMangement />,
         },
         {
@@ -24,20 +25,26 @@ function App() {
       ],
     },
     {
-      path: "/event-setting",
-      element: <EventSetting />,
-    },
-    {
-      path: "/prize-manage",
-      element: <PrizeMangement />,
-    },
-    {
-      path: "/contestant-list",
-      element: <ContestantList />,
-    },
-    {
-      path: "/winner-list",
-      element: <WinnerList />,
+      path: "/",
+      element: <EventConfigLayout />,
+      children: [
+        {
+          path: "/event-setting",
+          element: <EventSetting />,
+        },
+        {
+          path: "/prize-manage",
+          element: <PrizeMangement />,
+        },
+        {
+          path: "/contestant-list",
+          element: <ContestantList />,
+        },
+        {
+          path: "/winner-list",
+          element: <WinnerList />,
+        },
+      ],
     },
   ]);
   return <RouterProvider router={router} />;
