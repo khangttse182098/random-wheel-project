@@ -1,0 +1,67 @@
+:root {
+  --table-color: grey;
+  --table-text-color: white;
+}
+
+.ant-table-thead {
+  .ant-table-column-has-sorters,
+  th {
+    background: var(--table-color) !important;
+    color: var(--table-text-color) !important;
+    font-weight: 600 !important;
+  }
+}
+
+.ant-table-wrapper .ant-table.ant-table-bordered {
+  border-color: var(--table-color) !important;
+}
+
+.ant-table-wrapper .ant-table.ant-table-bordered > .ant-table-container {
+  border-inline-start: 1px solid var(--table-color) !important;
+}
+
+.ant-table-wrapper .ant-table.ant-table-bordered .ant-table-tbody > tr > td {
+  border-color: var(--table-color) !important;
+}
+
+// Border cho header
+.ant-table-wrapper .ant-table.ant-table-bordered .ant-table-thead > tr > th {
+  border-color: var(--table-color) !important;
+}
+
+// Đổi màu số trang và các nút pagination
+.ant-pagination .ant-pagination-item {
+  border-color: var(--table-color) !important;
+}
+
+.ant-pagination .ant-pagination-item a {
+  color: var(--table-color) !important;
+}
+
+// Đổi màu cho trang đang được chọn
+.ant-pagination .ant-pagination-item-active {
+  background-color: var(--table-color) !important;
+  border-color: var(--table-color) !important;
+}
+
+.ant-pagination .ant-pagination-item-active a {
+  color: var(--table-text-color) !important;
+}
+
+// Đổi màu các nút điều hướng (trái/phải)
+.ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  color: var(--table-color) !important;
+  border-color: var(--table-color) !important;
+}
+
+.ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+  background-color: var(--table-color) !important;
+  color: var(--table-text-color) !important;
+}
+
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td {
+  text-align: center !important;
+}
