@@ -179,6 +179,20 @@ const EventSetting = () => {
         <>{!record.spinningType ? "Quay từng chữ số" : "Quay tất cả chữ số"}</>
       ),
     },
+    {
+      title: "",
+      dataIndex: "setting",
+      render: () => (
+        <Button
+          icon={<FaWrench />}
+          className={style["setting__opt"]}
+          color="danger"
+          variant="solid"
+        >
+          Cài đặt
+        </Button>
+      ),
+    },
   ];
 
   const thirdData = [
