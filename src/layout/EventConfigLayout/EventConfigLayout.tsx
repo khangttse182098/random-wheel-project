@@ -8,7 +8,6 @@ const EventConfigLayout = () => {
     <div>
       <Header />
       <EventMenu />
-      <Outlet />
       <Footer />
     </div>
   );

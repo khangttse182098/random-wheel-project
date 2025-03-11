@@ -39,7 +39,7 @@ const ContestantList = () => {
           variant="solid"
           icon={<FaPlus />}
         >
-          Tạo sự kiện
+          Tạo mới
         </Button>
         {/* search */}
         <Search className={style["search__input"]} />
