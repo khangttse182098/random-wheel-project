@@ -9,6 +9,8 @@ interface AntDComponentProps<T> {
   bordered?: boolean;
   columnFlex?: number;
   textColor?: string;
+  isSort?: boolean;
+  isPagination?: boolean;
 }
 
 const AntDCustomTable = <T extends Record<string, T>>({
@@ -17,6 +19,8 @@ const AntDCustomTable = <T extends Record<string, T>>({
   bordered = true,
   columnFlex = 1,
   textColor = "white",
+  isSort = true,
+  isPagination = true,
 }: AntDComponentProps<T>) => {
   const processedColumns = useMemo(() => {
     return columns.map((col) => ({
@@ -48,9 +52,9 @@ const AntDCustomTable = <T extends Record<string, T>>({
     >
       <Table
         dataSource={dataSource}
-        columns={processedColumns}
+        columns={isSort ? processedColumns : columns}
         bordered={bordered}
-        pagination={{ pageSize: 7 }}
+        pagination={isPagination ? { pageSize: 7 } : false}
         scroll={{ x: "max-content" }}
       />
     </div>
