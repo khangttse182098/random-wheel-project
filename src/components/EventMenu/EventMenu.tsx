@@ -1,12 +1,28 @@
+import { useEffect } from "react";
 import style from "./EventMenu.module.scss";
 import { TfiMenuAlt } from "react-icons/tfi";
 import { FaGear } from "react-icons/fa6";
 import { MdOutlineFactCheck } from "react-icons/md";
+import useAppStore from "../../store/useAppStore";
+import { useNavigate } from "react-router";
 
 const EventMenu = () => {
+  const { chooseEvent } = useAppStore((state) => state);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!chooseEvent) {
+      navigate(-1);
+    }
+  }, [chooseEvent, navigate]);
+
+  if (!chooseEvent) {
+    return null; // or a loading spinner, or some other fallback UI
+  }
+
   return (
     <div className={style["container"]}>
-      <h1 className={style["title"]}>Sự kiện ABC</h1>
+      <h1 className={style["title"]}>{chooseEvent?.name}</h1>
       <nav className={style["header-nav"]}>
         <a href="/event-setting" className={style["nav-link"]}>
           <FaGear />

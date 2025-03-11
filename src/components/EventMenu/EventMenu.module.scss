@@ -1,4 +1,4 @@
-@import "../../index.scss";
+@use "../../index.scss" as *;
 
 $text-color: #525252;
 
@@ -19,6 +19,7 @@ $text-color: #525252;
   display: flex;
   background-color: $primary-color;
   padding: 15px;
+  border-radius: 10px;
 }
 
 .nav-link {
