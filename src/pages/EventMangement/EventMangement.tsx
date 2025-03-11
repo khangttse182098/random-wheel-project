@@ -8,6 +8,7 @@ import { ImCancelCircle } from "react-icons/im";
 import { FaWrench } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import useAppStore, { EventType } from "../../store/useAppStore";
+import { formatDate } from "../../utils/dateUtils";
 
 const EventMangement = () => {
   const navigate = useNavigate();
@@ -60,10 +61,16 @@ const EventMangement = () => {
     {
       title: "Ngày tạo",
       dataIndex: "created_at",
+      render: (_, record) => {
+        return <div>{formatDate(record.created_at)}</div>;
+      },
     },
     {
       title: "Ngày hết hạn",
       dataIndex: "expiry_date",
+      render: (_, record) => {
+        return <div>{formatDate(record.expiry_date)}</div>;
+      },
     },
     {
       title: "Chức năng",

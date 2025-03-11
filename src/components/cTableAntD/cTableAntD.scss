@@ -1,6 +1,7 @@
 :root {
-  --table-color: grey;
+  --table-color: linear-gradient(to right, #2774c7, #4a90e2);
   --table-text-color: white;
+  --table-border-color: #cce0ff;
 }
 
 .ant-table-thead {
@@ -12,6 +13,31 @@
   }
 }
 
+.ant-table-thead > tr {
+  background: var(--table-color) !important;
+    border-bottom: 2px solid var(--table-border-color) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: transparent !important;
+  color: var(--table-text-color) !important;
+  font-weight: 600 !important;
+  text-align: center;
+  border-color: var(--table-color) !important;
+}
+
+.ant-table-thead .ant-table-column-has-sorters {
+  background: transparent !important;
+}
+
+.ant-table-wrapper .ant-table.ant-table-bordered {
+  border-color: var(--table-color) !important;
+}
+
+.ant-table-thead > tr > th:first-child {
+  border-left: none !important;
+}
+
 .ant-table-wrapper .ant-table.ant-table-bordered {
   border-color: var(--table-color) !important;
 }
@@ -20,13 +46,12 @@
   border-inline-start: 1px solid var(--table-color) !important;
 }
 
-.ant-table-wrapper .ant-table.ant-table-bordered .ant-table-tbody > tr > td {
-  border-color: var(--table-color) !important;
-}
+// .ant-table-wrapper .ant-table.ant-table-bordered .ant-table-tbody > tr > td {
+//   border-color: var(--table-color) !important;
+// }
 
-Border
-  cho
-  header
+// Border cho
+header
   .ant-table-wrapper
   .ant-table.ant-table-bordered
   .ant-table-thead
@@ -35,7 +60,8 @@ Border
   border-color: var(--table-color) !important;
 }
 
-Đổi màu số trang và các nút pagination .ant-pagination .ant-pagination-item {
+// Đổi màu số trang và các nút pagination
+.ant-pagination .ant-pagination-item {
   border-color: var(--table-color) !important;
 }
 

@@ -8,7 +8,6 @@ interface AntDComponentProps<T> {
   columns: ColumnType<T>[];
   bordered?: boolean;
   columnFlex?: number;
-  tableColor?: string;
   textColor?: string;
 }
 
@@ -17,7 +16,6 @@ const AntDCustomTable = <T extends Record<string, T>>({
   columns,
   bordered = true,
   columnFlex = 1,
-  tableColor = "#808080",
   textColor = "white",
 }: AntDComponentProps<T>) => {
   const processedColumns = useMemo(() => {
@@ -44,7 +42,6 @@ const AntDCustomTable = <T extends Record<string, T>>({
     <div
       style={
         {
-          "--table-color": tableColor,
           "--table-text-color": textColor,
         } as React.CSSProperties
       }
