@@ -26,3 +26,17 @@ $text-color: #525252;
 .search__input {
   width: 20em;
 }
+
+.button__container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.edit__button {
+  border-radius: 8px;
+  // background-color: #ff6666;
+  color: #fff;
+  font-weight: bold;
+  padding: 5px 10px;
+  width: fit-content;
+}

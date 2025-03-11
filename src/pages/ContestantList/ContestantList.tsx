@@ -45,12 +45,7 @@ const ContestantList = () => {
         <Search className={style["search__input"]} />
       </div>
       {/* table */}
-      <AntDCustomTable
-        columns={columns}
-        dataSource={[]}
-        textColor="black"
-        tableColor="white"
-      />
+      <AntDCustomTable columns={columns} dataSource={[]} />
     </div>
   );
 };

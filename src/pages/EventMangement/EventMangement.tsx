@@ -5,8 +5,13 @@ import style from "./EventMangement.module.scss";
 import { FaPlus, FaRegCheckCircle } from "react-icons/fa";
 import Search from "antd/es/input/Search";
 import { ImCancelCircle } from "react-icons/im";
+import { FaWrench } from "react-icons/fa";
+import { useNavigate } from "react-router";
+import useAppStore, { EventType } from "../../store/useAppStore";
 
 const EventMangement = () => {
+  const navigate = useNavigate();
+  const { addChooseEvent } = useAppStore((state) => state);
   const columns: ColumnType[] = [
     {
       title: "STT",
@@ -62,6 +67,32 @@ const EventMangement = () => {
     },
     {
       title: "Chức năng",
+      render: (_, record) => {
+        const { status, index, ...eventData } = record;
+        return (
+          <div className={style["button__container"]}>
+            <Button
+              className={style["edit__button"]}
+              color="green"
+              variant="solid"
+            >
+              Link quay số
+            </Button>
+            <Button
+              icon={<FaWrench />}
+              className={style["edit__button"]}
+              color="danger"
+              variant="solid"
+              onClick={() => {
+                addChooseEvent(eventData as EventType);
+                navigate("/event-setting");
+              }}
+            >
+              Cấu hình
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -107,12 +138,7 @@ const EventMangement = () => {
         <Search className={style["search__input"]} />
       </div>
       {/* table */}
-      <AntDCustomTable
-        columns={columns}
-        dataSource={dataSource}
-        textColor="black"
-        tableColor="white"
-      />
+      <AntDCustomTable columns={columns} dataSource={dataSource} />
     </div>
   );
 };
