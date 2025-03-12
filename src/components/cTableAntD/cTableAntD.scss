@@ -15,7 +15,7 @@
 
 .ant-table-thead > tr {
   background: var(--table-color) !important;
-    border-bottom: 2px solid var(--table-border-color) !important;
+  border-bottom: 2px solid var(--table-border-color) !important;
 }
 
 .ant-table-thead > tr > th {
@@ -75,9 +75,9 @@ header
   border-color: var(--table-color) !important;
 }
 
-.ant-pagination .ant-pagination-item-active a {
-  color: var(--table-text-color) !important;
-}
+// .ant-pagination .ant-pagination-item-active a {
+//   color: var(--table-text-color) !important;
+// }
 
 // Đổi màu các nút điều hướng (trái/phải)
 .ant-pagination .ant-pagination-prev .ant-pagination-item-link,

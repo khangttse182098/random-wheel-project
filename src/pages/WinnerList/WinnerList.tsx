@@ -1,7 +1,8 @@
+import { ImCross } from "react-icons/im";
+import { FaRegFileExcel } from "react-icons/fa";
 import { ColumnType } from "antd/es/table";
 import style from "./WinnerList.module.scss";
-import { Button } from "antd";
-import { FaPlus } from "react-icons/fa";
+import { Button, Modal } from "antd";
 import Search from "antd/es/input/Search";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 
@@ -46,14 +47,24 @@ const WinnerList = () => {
     <div className={style["container"]}>
       {/* create event */}
       <div className={style["function__container"]}>
-        <Button
-          className={style["button__add"]}
-          color="primary"
-          variant="solid"
-          icon={<FaPlus />}
-        >
-          Tạo sự kiện
-        </Button>
+        <div className={style["button__list"]}>
+          <Button
+            className={style["button__add"]}
+            color="primary"
+            variant="solid"
+            icon={<FaRegFileExcel />}
+          >
+            Xuất excel
+          </Button>
+          <Button
+            className={style["button__add"]}
+            color="danger"
+            variant="solid"
+            icon={<ImCross />}
+          >
+            Xoá tất cả
+          </Button>
+        </div>
         {/* search */}
         <Search className={style["search__input"]} />
       </div>
