@@ -7,6 +7,7 @@ import WinnerList from "./pages/WinnerList/WinnerList";
 import HomeLayout from "./layout/HomeLayout/HomeLayout";
 import AccountInfo from "./pages/AccountInfo/AccountInfo";
 import EventConfigLayout from "./layout/EventConfigLayout/EventConfigLayout";
+import SignIn from "./pages/SignIn/SignIn";
 
 function App() {
   const router = createBrowserRouter([
@@ -46,6 +47,10 @@ function App() {
         },
       ],
     },
+    {
+      path: "/login",
+      element: <SignIn />,
+    }
   ]);
   return <RouterProvider router={router} />;
 }
