@@ -1,0 +1,85 @@
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    margin-top: 25px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(86, 85, 85, 0.1);
+    margin-bottom: 100px;;
+}
+.title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #636363;
+}
+.account__info {
+    display: flex;
+    gap: 20px;
+}
+.left__panel, .right__panel {
+    flex: 1;
+}
+.info__box, .support__box, .payment__box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+.info__box p, .payment__box p {
+    margin: 10px 0;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.red__btn {
+    background-color: #c82333;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.red__btn:hover {
+    background-color: #a61f2b;
+}
+.yellow__btn {
+    background-color: #ffc107;
+    color: black;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: rgb(21, 120, 21);
+    cursor: pointer;
+}
+
+.yellow__btn:hover {
+    background-color: #e0a800;
+}
+.right__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.support__box h3 {
+    color: #c82333;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: bold;
+}
