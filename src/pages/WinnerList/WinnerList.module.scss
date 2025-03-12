@@ -24,6 +24,10 @@ $text-color: #525252;
   color: white;
 }
 
+.button__list {
+  display: flex;
+  gap: 15px;
+}
 .search__input {
   width: 20em;
 }

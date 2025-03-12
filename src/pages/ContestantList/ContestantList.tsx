@@ -1,3 +1,6 @@
+import { ImCross } from "react-icons/im";
+import { FaDownload } from "react-icons/fa6";
+import { FaRegFileExcel } from "react-icons/fa";
 import { ColumnType } from "antd/es/table";
 import style from "./ContestantList.module.scss";
 import { Button } from "antd";
@@ -33,14 +36,40 @@ const ContestantList = () => {
     <div className={style["container"]}>
       {/* create event */}
       <div className={style["function__container"]}>
-        <Button
-          className={style["button__add"]}
-          color="primary"
-          variant="solid"
-          icon={<FaPlus />}
-        >
-          Tạo mới
-        </Button>
+        <div className={style["button__list"]}>
+          <Button
+            className={style["button__add"]}
+            color="primary"
+            variant="solid"
+            icon={<FaPlus />}
+          >
+            Tạo mới
+          </Button>
+          <Button
+            className={style["button__add"]}
+            color="primary"
+            variant="solid"
+            icon={<FaRegFileExcel />}
+          >
+            Import excel
+          </Button>
+          <Button
+            className={style["button__add"]}
+            color="primary"
+            variant="solid"
+            icon={<FaDownload />}
+          >
+            Tải mẫu excel
+          </Button>
+          <Button
+            className={style["button__add"]}
+            color="danger"
+            variant="solid"
+            icon={<ImCross />}
+          >
+            Xoá tất cả
+          </Button>
+        </div>
         {/* search */}
         <Search className={style["search__input"]} />
       </div>
