@@ -37,6 +37,10 @@ const EventMenu = () => {
           <TfiMenuAlt />
           DANH SÁCH TRÚNG GIẢI
         </Link>
+        <Link to="/spin-page" className={style["nav-link"]}>
+          <TfiMenuAlt />
+          LINK QUAY SỐ
+        </Link>
       </nav>
       <Outlet />
     </div>
