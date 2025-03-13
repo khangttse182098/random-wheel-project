@@ -1,11 +1,8 @@
 import type { CheckboxProps, ColorPickerProps, GetProp } from "antd";
 import {
-  Button,
   Checkbox,
   Col,
   ColorPicker,
-  Divider,
-  Image,
   Modal,
   Row,
   Select,
@@ -17,14 +14,11 @@ import { ColumnType } from "antd/es/table";
 import { useMemo, useState } from "react";
 import { FaCheck, FaWrench } from "react-icons/fa";
 import { ImCross } from "react-icons/im";
-import backgroundImg from "../../assets/background.jpg";
-import logoImg from "../../assets/logo.png";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import { Button, Divider, Image } from "antd";
 import style from "./EventSetting.module.scss";
 import logoImg from "../../assets/logo.png";
 import backgroundImg from "../../assets/background.jpg";
-
 
 type Color = Extract<
   GetProp<ColorPickerProps, "value">,
@@ -112,11 +106,11 @@ const EventSetting = () => {
   const [logoImage, setLogoImage] = useState<string | null>(null);
 
   // Handle file upload
-  const handleUpload = (info: any, setImage: any) => {
-    if (info.file.status === "done") {
-      setImage(URL.createObjectURL(info.file.originFileObj));
-    }
-  };
+  // const handleUpload = (info: any, setImage: any) => {
+  //   if (info.file.status === "done") {
+  //     setImage(URL.createObjectURL(info.file.originFileObj));
+  //   }
+  // };
 
   const showModal = () => {
     setIsModalOpen(true);
