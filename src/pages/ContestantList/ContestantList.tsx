@@ -14,7 +14,7 @@ const ContestantList = () => {
       title: "STT",
       dataIndex: "index",
       key: "index",
-      render: (text: string, record: any, index: number) => index,
+      render: (_: string, __: any, index: number) => index,
     },
     {
       title: "Mã quay số",

@@ -6,7 +6,7 @@ import useAppStore from "../../store/useAppStore";
 const mockData = ["AI4SZ", "01234", "LMFAO"];
 
 //NHỚ SỬA MOCKDATA THÀNH VALUE KHI SỬA LẠI BÊN TRANG EVENT-SETTING
-const SpinPage = ({ value }: { value: string[] }) => {
+const SpinPage = (/*{ value }: { value: string[] }*/) => {
   const [code, setCode] = useState<string[]>(
     Array(mockData[0].length).fill("")
   );

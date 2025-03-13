@@ -3,13 +3,10 @@ import { FaCheck } from "react-icons/fa";
 import { ColumnType } from "antd/es/table";
 import { FaWrench } from "react-icons/fa";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
-import { Button, Divider, Image, Modal } from "antd";
+import { Button, Divider, Image } from "antd";
 import style from "./EventSetting.module.scss";
 import logoImg from "../../assets/logo.png";
 import backgroundImg from "../../assets/background.jpg";
-import { useState } from "react";
-import SpinningWheel from "../../components/SpinningWheel/SpinningWheel";
-import FlipCounter from "../../components/SpinningWheel/SpinningWheel";
 
 const EventSetting = () => {
   const firstColumn: ColumnType[] = [
