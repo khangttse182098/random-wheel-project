@@ -13,7 +13,7 @@ interface AntDComponentProps<T> {
   isPagination?: boolean;
 }
 
-const AntDCustomTable = <T extends Record<string, T>>({
+const AntDCustomTable = <T extends Record<string, any>>({
   dataSource = [],
   columns,
   bordered = true,

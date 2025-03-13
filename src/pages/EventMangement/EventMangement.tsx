@@ -1,19 +1,99 @@
-import { Button } from "antd";
-import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
-import { ColumnType } from "antd/es/table";
-import style from "./EventMangement.module.scss";
-import { FaPlus, FaRegCheckCircle } from "react-icons/fa";
+import { Button, TimePicker } from "antd";
 import Search from "antd/es/input/Search";
+import { ColumnType } from "antd/es/table";
+import { useCallback, useEffect, useState } from "react";
+import { AiOutlineEdit } from "react-icons/ai";
+import { FaPlus, FaRegCheckCircle, FaWrench } from "react-icons/fa";
 import { ImCancelCircle } from "react-icons/im";
-import { FaWrench } from "react-icons/fa";
+import { IoIosCloseCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router";
-import useAppStore, { EventType } from "../../store/useAppStore";
+import { toast } from "react-toastify";
+import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
+import { EventData, UpdateEventData } from "../../models/event";
+import { getEventList, updateEvent } from "../../service/event/api";
+import useAppStore from "../../store/useAppStore";
 import { formatDate } from "../../utils/dateUtils";
+import style from "./EventMangement.module.scss";
+import dayjs from "dayjs";
 
 const EventMangement = () => {
+  const [eventData, setEventData] = useState<EventData[]>([]);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editingRecord, setEditingRecord] = useState<EventData | null>(null);
   const navigate = useNavigate();
   const { addChooseEvent } = useAppStore((state) => state);
-  const columns: ColumnType[] = [
+
+  const fetchEventList = useCallback(async () => {
+    try {
+      const res = await getEventList();
+      const data = res.data.data;
+      setEventData(data);
+    } catch (error) {
+      toast.error("Lỗi khi lấy danh sách sự kiện");
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchEventList();
+  }, []);
+
+  const handleUpdateEvent = useCallback(
+    async (id: string) => {
+      try {
+        if (!editingRecord) {
+          toast.error("Không có dữ liệu để cập nhật!");
+          return;
+        }
+
+        const originalRecord = eventData.find((item) => item.id === id);
+        if (!originalRecord) return;
+
+        // Chỉ lấy 3 trường cần cập nhật
+        const payload: UpdateEventData = {
+          name: originalRecord.name,
+          expiryDate: originalRecord.expiryDate,
+          status: originalRecord.status === "Active" ? true : false,
+        };
+
+        if (editingRecord.name !== originalRecord.name) {
+          payload.name = editingRecord.name;
+        }
+        if (editingRecord.expiryDate !== originalRecord.expiryDate) {
+          payload.expiryDate = editingRecord.expiryDate;
+        }
+        if (editingRecord.status !== originalRecord.status) {
+          payload.status = editingRecord.status === "Active" ? true : false;
+        }
+
+        if (Object.keys(payload).length === 0) {
+          toast.info("Không có thay đổi nào để cập nhật.");
+          setEditingKey(null);
+          setEditingRecord(null);
+          return;
+        }
+
+        await updateEvent(id, payload);
+        toast.success("Cập nhật sự kiện thành công");
+        setEditingKey(null);
+        setEditingRecord(null);
+        fetchEventList();
+      } catch (error) {
+        toast.error("Lỗi khi cập nhật dữ liệu");
+      }
+    },
+    [editingRecord, fetchEventList]
+  );
+
+  const handleEditDetails = (record: EventData) => {
+    setEditingKey(record.id);
+    setEditingRecord({ ...record });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingKey(null);
+  };
+
+  const columns: ColumnType<EventData>[] = [
     {
       title: "STT",
       dataIndex: "index",
@@ -60,22 +140,32 @@ const EventMangement = () => {
     },
     {
       title: "Ngày tạo",
-      dataIndex: "created_at",
-      render: (_, record) => {
-        return <div>{formatDate(record.created_at)}</div>;
-      },
+      dataIndex: "createdAt",
+      render: (_, record) =>
+        editingKey === record.createdAt ? (
+          <TimePicker
+            value={dayjs(editingRecord?.createdAt)}
+            onChange={(time: any) =>
+              setEditingRecord((prev) =>
+                prev ? { ...prev, createdAt: time } : prev
+              )
+            }
+          />
+        ) : (
+          formatDate(record.createdAt)
+        ),
     },
     {
       title: "Ngày hết hạn",
-      dataIndex: "expiry_date",
+      dataIndex: "expiryDate",
       render: (_, record) => {
-        return <div>{formatDate(record.expiry_date)}</div>;
+        return <div>{formatDate(record.expiryDate)}</div>;
       },
     },
     {
       title: "Chức năng",
       render: (_, record) => {
-        const { status, index, ...eventData } = record;
+        const { status, ...eventData } = record;
         return (
           <div className={style["button__container"]}>
             <Button
@@ -85,13 +175,41 @@ const EventMangement = () => {
             >
               Link quay số
             </Button>
+            {editingKey === record.id ? (
+              <div style={{ display: "flex", gap: "12px" }}>
+                <FaRegCheckCircle
+                  style={{
+                    fontSize: "25px",
+                    color: "green",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleUpdateEvent(record.id)}
+                />
+                <IoIosCloseCircleOutline
+                  style={{ fontSize: "25px", color: "red", cursor: "pointer" }}
+                  onClick={handleCancelEdit}
+                />
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: "12px" }}>
+                <AiOutlineEdit
+                  size={30}
+                  style={{ color: "orange", cursor: "pointer" }}
+                  onClick={() => handleEditDetails(record)}
+                />
+              </div>
+            )}
             <Button
               icon={<FaWrench />}
               className={style["edit__button"]}
               color="danger"
               variant="solid"
               onClick={() => {
-                addChooseEvent(eventData as EventType);
+                addChooseEvent({
+                  name: eventData.name,
+                  created_at: eventData.createdAt,
+                  expiry_date: eventData.expiryDate,
+                });
                 navigate("/event-setting");
               }}
             >
@@ -100,30 +218,6 @@ const EventMangement = () => {
           </div>
         );
       },
-    },
-  ];
-
-  const dataSource = [
-    {
-      key: "1",
-      name: "Sự kiện A",
-      status: "active",
-      created_at: "2025-01-01",
-      expiry_date: "2025-12-31",
-    },
-    {
-      key: "2",
-      name: "Sự kiện B",
-      status: "disabled",
-      created_at: "2024-05-15",
-      expiry_date: "2024-11-15",
-    },
-    {
-      key: "3",
-      name: "Sự kiện C",
-      status: "active",
-      created_at: "2025-03-01",
-      expiry_date: "2025-06-01",
     },
   ];
 
@@ -145,7 +239,7 @@ const EventMangement = () => {
         <Search className={style["search__input"]} />
       </div>
       {/* table */}
-      <AntDCustomTable columns={columns} dataSource={dataSource} />
+      <AntDCustomTable columns={columns} dataSource={eventData} />
     </div>
   );
 };

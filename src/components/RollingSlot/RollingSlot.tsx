@@ -11,6 +11,7 @@ const RollingSlot: React.FC<RollingSlotProps> = ({ value, delay }) => {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
+    let interval: NodeJS.Timeout;
     if (slotRef.current) {
       gsap.fromTo(
         slotRef.current,
@@ -21,7 +22,15 @@ const RollingSlot: React.FC<RollingSlotProps> = ({ value, delay }) => {
           duration: 1.5, // animation khoảng 1.5s
           ease: "power2.out", // Hiệu ứng chuyển động
           delay: delay,
-          onComplete: () => setDisplayValue(value), // Cập nhật số hiển thị sau animation
+          onStart: () => {
+            interval = setInterval(() => {
+              setDisplayValue((prev) => (prev + 1) % 10);
+            }, 100);
+          },
+          onComplete: () => {
+            clearInterval(interval);
+            setDisplayValue(value);
+          },
         }
       );
     }
