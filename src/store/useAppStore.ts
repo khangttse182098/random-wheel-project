@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 export interface EventType {
+  id: string;
   name: string;
   created_at: string;
   expiry_date: string;

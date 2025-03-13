@@ -12,7 +12,7 @@ const PrizeMangement = () => {
       title: "STT",
       dataIndex: "index",
       key: "index",
-      render: (text: string, record: any, index: number) => index + 1,
+      render: (_: string, __: any, index: number) => index + 1,
     },
     {
       title: "Tên giải",
