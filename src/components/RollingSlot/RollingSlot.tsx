@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
-import useAppStore from "../../store/useAppStore";
 import style from "../../pages/SpinPage/SpinPage.module.scss";
 
 interface RollingSlotProps {
-  value: string;
+  currentCode: string;
   delay: number;
+  previousCode: string;
 }
 
 const charList = [
@@ -47,44 +47,49 @@ const charList = [
   "Z",
 ];
 
-const getAnimationPosition = (position: number) => {
-  return position * -200;
+const getAnimationPosition = (position: number, previousCode: number) => {
+  return {
+    start: previousCode * -200 - 7200,
+    end: position * -200,
+  };
 };
 
-const RollingSlot: React.FC<RollingSlotProps> = ({ value, delay }) => {
+const RollingSlot: React.FC<RollingSlotProps> = ({
+  currentCode,
+  delay,
+  previousCode,
+}) => {
   const slotRef = useRef<HTMLUListElement>(null);
-  const { setIsSlotSpinning } = useAppStore((state) => state);
   useEffect(() => {
-    const position = charList.indexOf(value);
-    const randomY = getAnimationPosition(position);
-    if (position != -1) {
+    const valuePosition = charList.indexOf(currentCode);
+    const previousCodePosition = charList.indexOf(previousCode);
+
+    const { start, end } = getAnimationPosition(
+      valuePosition,
+      previousCodePosition
+    );
+    if (valuePosition != -1) {
       gsap.fromTo(
         slotRef.current,
-        { y: -14200 }, // Bắt đầu dịch chuyển lên trên (-100px) và ẩn đi
+        { y: start },
         {
-          y: randomY, // Trả về vị trí gốc
+          y: end, // Trả về vị trí gốc
           duration: 3, // animation khoảng 1.5s
           ease: "power3.inOut", // Hiệu ứng chuyển động
           delay: delay,
-          onStart: () => {
-            setIsSlotSpinning(true);
-          },
-          onComplete: () => {
-            setIsSlotSpinning(false);
-          },
         }
       );
     }
-  }, [value, delay, setIsSlotSpinning]);
+  }, [currentCode, previousCode, delay]);
 
   return (
     <div className={style["slot"]}>
       <ul ref={slotRef} className={style["slot-number"]}>
-        {charList.map((char) => (
-          <li>{char}</li>
+        {charList.map((char, index) => (
+          <li key={index}>{char}</li>
         ))}
-        {charList.map((char) => (
-          <li>{char}</li>
+        {charList.map((char, index) => (
+          <li key={index}>{char}</li>
         ))}
       </ul>
     </div>
