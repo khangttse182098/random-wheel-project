@@ -28,6 +28,12 @@ $text-color: #525252;
   display: flex;
   align-items: center;
   gap: 10;
+  &.active {
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 5px;
+    background-color: #e0e0e0;
+  }
 }
 
 .nav-link:hover {
