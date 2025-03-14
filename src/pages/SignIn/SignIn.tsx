@@ -1,25 +1,62 @@
 import style from "./SignIn.module.scss";
-import { Input } from 'antd';
+import { Form, Input } from 'antd';
 import login from "../../../public/login.jpg";
+import { useForm } from "antd/es/form/Form";
+import { useCallback } from "react";
+import { LoginData } from "../../models/login";
+import { loginFunction } from "../../service/auth/api";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
+
 
 const SignIn = () => {
+
+    const [form] = useForm();
+    const navigate = useNavigate();
+
+    const loginEvent = useCallback(async () => {
+        try {
+          const userName = form.getFieldValue("username");
+          const password = form.getFieldValue("password");
+          const payload: LoginData = {
+            userName: userName,
+            password: password,
+          };
+          console.log(payload);
+          const response = await loginFunction(payload);
+          if (response.data.code === 200) {
+            toast.success("Đăng nhập thành công");
+            form.resetFields();
+            navigate("/");
+          } else {
+            toast.error("Tài khoản hoặc mật khẩu không đúng!");
+          }
+        } catch (error) {
+          toast.error("Lỗi khi tạo sự kiện!");
+        }
+      }, [form]);
+
     return (
         <div className={style["container"]}>
             <div className={style["container__left"]}>
             <h2 className={style["container__title"]}>ĐĂNG NHẬP</h2>
-                <form className={style["container__form"]}>
-                    <div className={style["container__form__userName"]}>
-                        <label>Tên người dùng <span className={style["must__field"]}>*</span></label>
+                <Form form={form} labelCol={{ span: 24 }}>
+                    <Form.Item
+                        name="username"
+                        label={<span style={{ color: "#5a93d1", fontSize: "18px" }}>Tên người dùng <span className={style["must__field"]}> * </span></span>}
+                    >
                         <Input placeholder="Nhập vào tên người dùng" className={style["input"]}/>
-                    </div>
-                    <div className={style["container__form__password"]}>
-                        <label>Mật khẩu <span className={style["must__field"]}>*</span> </label>
-                        <Input placeholder="Nhập vào mật khẩu" className={style["input"]}/>
-                    </div>
-                    <button type="submit" className={style["container__form__button"]}>
+                    </Form.Item>
+                    <Form.Item
+                        name="password"
+                        label={<span style={{ color: "#5a93d1", fontSize: "18px" }}>Mật khẩu <span className={style["must__field"]}> * </span></span>}
+                    >
+                        <Input.Password placeholder="Nhập vào mật khẩu" className={style["input"]}/>
+                    </Form.Item>
+                    <button type="submit" className={style["container__form__button"]} onClick={() => loginEvent()}>
                         ĐĂNG NHẬP
                     </button>
-                </form>
+                </Form>
             </div>
             <div className={style["container__right"]}>
                 <img src={login} alt="" className={style["image"]}/>
