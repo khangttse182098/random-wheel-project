@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
-import useAppStore from "../../store/useAppStore";
 import style from "../../pages/SpinPage/SpinPage.module.scss";
 
 interface RollingSlotProps {
