@@ -106,6 +106,7 @@ const ContestantList = () => {
       title: "STT",
       dataIndex: "index",
       key: "index",
+
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
