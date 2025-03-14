@@ -15,3 +15,8 @@ export const updateEvent = (id: string, data: UpdateEventData) => {
 export const addEvent = (data: CreateEventData) => {
   return api.post("/api/v1/events", data);
 };
+
+// Cấu hình sự kiện
+export const getConfigureEvent = (eventId: string) => {
+  return api.get(`/api/v1/event-settings/event/${eventId}`);
+};

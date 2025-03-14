@@ -1,8 +1,11 @@
 import type { CheckboxProps, ColorPickerProps, GetProp } from "antd";
 import {
+  Button,
   Checkbox,
   Col,
   ColorPicker,
+  Divider,
+  Image,
   Modal,
   Row,
   Select,
@@ -11,14 +14,14 @@ import {
   Upload,
 } from "antd";
 import { ColumnType } from "antd/es/table";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCheck, FaWrench } from "react-icons/fa";
 import { ImCross } from "react-icons/im";
+import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
-import { Button, Divider, Image } from "antd";
+import { getConfigureEvent } from "../../service/event/api";
+import useAppStore from "../../store/useAppStore";
 import style from "./EventSetting.module.scss";
-import logoImg from "../../assets/logo.png";
-import backgroundImg from "../../assets/background.jpg";
 
 type Color = Extract<
   GetProp<ColorPickerProps, "value">,
@@ -29,6 +32,9 @@ const EventSetting = () => {
   const onChange: CheckboxProps["onChange"] = (e) => {
     console.log(`checked = ${e.target.checked}`);
   };
+  const [settingEventData, setSettingEventData] = useState(null);
+  const { chooseEvent } = useAppStore((state) => state);
+  const eventID = chooseEvent?.id;
   const [slotCount, setSlotCount] = useState(7);
   const [drawType, setDrawType] = useState("both");
   const [colorBg, setColorBg] = useState<Color>("#1677ff");
@@ -101,7 +107,6 @@ const EventSetting = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenAdvanced, setIsModalOpenAdvanced] = useState(false);
   const [isModalOpenShow, setIsModalOpenShow] = useState(false);
-
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
 
@@ -148,6 +153,22 @@ const EventSetting = () => {
     setIsModalOpenShow(false);
   };
 
+  const fetchEventSetting = useCallback(async () => {
+    try {
+      const res = await getConfigureEvent(eventID!);
+      const data = res.data.data;
+      setSettingEventData(data);
+    } catch (error) {
+      toast.error("Lỗi khi lấy cấu hình sự kiện");
+    }
+  }, []);
+
+  const transformedData = settingEventData ? [settingEventData] : [];
+
+  useEffect(() => {
+    fetchEventSetting();
+  }, []);
+
   const firstColumn: ColumnType[] = [
     {
       title: "Logo",
@@ -159,18 +180,19 @@ const EventSetting = () => {
       dataIndex: "backgroundImage",
       render: (_, record) => <Image width={100} src={record.backgroundImage} />,
     },
-    {
-      title: "Màu nền",
-      dataIndex: "backgroundColor",
-      render: (_, record) => (
-        <div
-          style={{
-            backgroundColor: record.backgroundColor,
-          }}
-          className={style["color__opt"]}
-        ></div>
-      ),
-    },
+    // Trường này ko ảnh hưởng gì (cân nhắc xóa)
+    // {
+    //   title: "Màu nền",
+    //   dataIndex: "backgroundColor",
+    //   render: (_, record) => (
+    //     <div
+    //       style={{
+    //         backgroundColor: record.backgroundColor,
+    //       }}
+    //       className={style["color__opt"]}
+    //     ></div>
+    //   ),
+    // },
     {
       title: "Màu nút bấm",
       dataIndex: "buttonColor",
@@ -185,11 +207,11 @@ const EventSetting = () => {
     },
     {
       title: "Màu nền các số",
-      dataIndex: "numberColor",
+      dataIndex: "numberBackgroundColor",
       render: (_, record) => (
         <div
           style={{
-            backgroundColor: record.numberColor,
+            backgroundColor: record.numberBackgroundColor,
           }}
           className={style["color__opt"]}
         ></div>
@@ -223,24 +245,14 @@ const EventSetting = () => {
       ),
     },
   ];
-  const firstData = [
-    {
-      logo: logoImg,
-      backgroundImage: backgroundImg,
-      backgroundColor: "white",
-      buttonColor: "blue",
-      numberColor: "red",
-      textColor: "white",
-    },
-  ];
 
   const secondColumn: ColumnType[] = [
     {
       title: "Hiển thị hình nền",
-      dataIndex: "isShowBackground",
+      dataIndex: "showBackground",
       render: (_, record) => (
         <>
-          {record.isShowBackground ? (
+          {record.showBackground === true ? (
             <FaCheck color="green" size={25} style={{ margin: "auto" }} />
           ) : (
             <ImCross color="red" size={25} style={{ margin: "auto" }} />
@@ -250,10 +262,10 @@ const EventSetting = () => {
     },
     {
       title: "Hiển thị logo",
-      dataIndex: "isShowLogo",
+      dataIndex: "showLogo",
       render: (_, record) => (
         <>
-          {record.isShowLogo ? (
+          {record.showLogo === true ? (
             <FaCheck color="green" size={25} style={{ margin: "auto" }} />
           ) : (
             <ImCross color="red" size={25} style={{ margin: "auto" }} />
@@ -263,10 +275,10 @@ const EventSetting = () => {
     },
     {
       title: "Hiển thị tên sự kiện",
-      dataIndex: "isShowEventName",
+      dataIndex: "showEventName",
       render: (_, record) => (
         <>
-          {record.isShowEventName ? (
+          {record.showEventName === true ? (
             <FaCheck color="green" size={25} style={{ margin: "auto" }} />
           ) : (
             <ImCross color="red" size={25} style={{ margin: "auto" }} />
@@ -292,34 +304,19 @@ const EventSetting = () => {
     },
   ];
 
-  const secondData = [
-    {
-      isShowBackground: true,
-      isShowLogo: false,
-      isShowEventName: false,
-    },
-  ];
-
   const thirdColumn: ColumnType[] = [
     {
       title: "Số lượng ô",
-      dataIndex: "numberSize",
+      dataIndex: "numberOfSlots",
     },
     {
       title: "Loại quay số",
-      dataIndex: "wheelType",
-      render: (_, record) => {
-        if (record.wheelType == 0) return <span>Bao gồm cả số và chữ</span>;
-        else if (record.wheelType == 1) return <span>Chỉ bao gồm số</span>;
-        else if (record.wheelType == 2) return <span>Chỉ bao gồm chữ</span>;
-      },
+      dataIndex: "spinCategory",
     },
     {
+      // Mặc định quay từng chữ số, không cho thay đổi
       title: "Kiểu quay số",
-      dataIndex: "spinningType",
-      render: (_, record) => (
-        <>{!record.spinningType ? "Quay từng chữ số" : "Quay tất cả chữ số"}</>
-      ),
+      dataIndex: "spinType",
     },
     {
       title: "",
@@ -338,13 +335,6 @@ const EventSetting = () => {
     },
   ];
 
-  const thirdData = [
-    {
-      numberSize: 5,
-      wheelType: 0,
-      spinningType: 0,
-    },
-  ];
   return (
     <div className={style["container"]}>
       <div className={style["wrapper"]}>
@@ -352,7 +342,7 @@ const EventSetting = () => {
         <Divider className={style["divider"]} />
         <AntDCustomTable
           columns={firstColumn}
-          dataSource={firstData}
+          dataSource={transformedData}
           isSort={false}
           isPagination={false}
         />
@@ -362,7 +352,7 @@ const EventSetting = () => {
         <Divider className={style["divider"]} />
         <AntDCustomTable
           columns={secondColumn}
-          dataSource={secondData}
+          dataSource={transformedData}
           isSort={false}
           isPagination={false}
         />
@@ -372,7 +362,7 @@ const EventSetting = () => {
         <Divider className={style["divider"]} />
         <AntDCustomTable
           columns={thirdColumn}
-          dataSource={thirdData}
+          dataSource={transformedData}
           isSort={false}
           isPagination={false}
         />

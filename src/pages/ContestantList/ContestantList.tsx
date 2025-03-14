@@ -105,7 +105,7 @@ const ContestantList = () => {
     } catch (error) {
       toast.error("Lỗi khi lưu danh sách người tham dự");
     }
-  }, []);
+  }, [participantData]);
 
   const handleDeleteParticipant = async (id: string) => {
     try {
