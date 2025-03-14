@@ -1,7 +1,6 @@
 import { useState } from "react";
 import RollingSlot from "../../components/RollingSlot/RollingSlot";
 import style from "./SpinPage.module.scss";
-import useAppStore from "../../store/useAppStore";
 
 const mockData = ["AI4SZ", "01234", "LMFAO"];
 
@@ -10,8 +9,11 @@ const SpinPage = (/*{ value }: { value: string[] }*/) => {
   const [code, setCode] = useState<string[]>(
     Array(mockData[0].length).fill("")
   );
+  const [previousCode, setPreviousCode] = useState<string[]>(
+    Array(mockData[0].length).fill("0")
+  );
   const [spinKey, setSpinKey] = useState(0);
-  const { isSlotSpinning } = useAppStore((state) => state);
+  const [isSpinning, setIsSpinning] = useState(false);
 
   const handldeGetRandomCode = () => {
     // const selectedCode = value[Math.floor(Math.random() * value.length)];
@@ -21,8 +23,20 @@ const SpinPage = (/*{ value }: { value: string[] }*/) => {
 
   const spin = () => {
     const randomCode = handldeGetRandomCode();
+    //set previousCode
+    setPreviousCode(spinKey ? code : previousCode);
+
+    //set new code
     setCode(randomCode);
     setSpinKey((prevKey) => prevKey + 1); // Update the key to force re-mount
+
+    //disabled spin button
+    setIsSpinning(true);
+
+    //set waitting time before spinning again
+    setTimeout(() => {
+      setIsSpinning(false);
+    }, (code.length - 0.7) * 3 * 0.3 * 1000);
   };
 
   return (
@@ -32,12 +46,13 @@ const SpinPage = (/*{ value }: { value: string[] }*/) => {
         {code.map((num, index) => (
           <RollingSlot
             key={`${spinKey}-${index}`}
-            value={num}
+            currentCode={num}
             delay={index * 0.3}
+            previousCode={previousCode[index]}
           />
         ))}
       </div>
-      <button onClick={spin} disabled={isSlotSpinning}>
+      <button onClick={spin} disabled={isSpinning}>
         Quay
       </button>
     </div>
