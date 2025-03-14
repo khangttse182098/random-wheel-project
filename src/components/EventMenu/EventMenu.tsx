@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import style from "./EventMenu.module.scss";
-import { TfiMenuAlt } from "react-icons/tfi";
 import { FaGear } from "react-icons/fa6";
 import { MdOutlineFactCheck } from "react-icons/md";
+import { TfiMenuAlt } from "react-icons/tfi";
+import { NavLink, Outlet, useNavigate } from "react-router";
 import useAppStore from "../../store/useAppStore";
-import { Link, Outlet, useNavigate } from "react-router";
+import style from "./EventMenu.module.scss";
 
 const EventMenu = () => {
   const { chooseEvent } = useAppStore((state) => state);
@@ -21,26 +21,61 @@ const EventMenu = () => {
     <div className={style["container"]}>
       <h1 className={style["title"]}>{chooseEvent?.name}</h1>
       <nav className={style["header-nav"]}>
-        <Link to="/event-setting" className={style["nav-link"]}>
+        <NavLink
+          to="/event-setting"
+          className={({ isActive }) =>
+            isActive
+              ? `${style["nav-link"]} ${style["active"]}`
+              : style["nav-link"]
+          }
+        >
           <FaGear />
           CÀI ĐẶT SỰ KIỆN
-        </Link>
-        <Link to="/prize-manage" className={style["nav-link"]}>
+        </NavLink>
+        <NavLink
+          to="/prize-manage"
+          className={({ isActive }) =>
+            isActive
+              ? `${style["nav-link"]} ${style["active"]}`
+              : style["nav-link"]
+          }
+        >
           <MdOutlineFactCheck />
           QUẢN LÝ GIẢI QUAY
-        </Link>
-        <Link to="/contestant-list" className={style["nav-link"]}>
+        </NavLink>
+        <NavLink
+          to="/contestant-list"
+          className={({ isActive }) =>
+            isActive
+              ? `${style["nav-link"]} ${style["active"]}`
+              : style["nav-link"]
+          }
+        >
           <TfiMenuAlt />
           DANH SÁCH NGƯỜI THAM DỰ
-        </Link>
-        <Link to="/winner-list" className={style["nav-link"]}>
+        </NavLink>
+        <NavLink
+          to="/winner-list"
+          className={({ isActive }) =>
+            isActive
+              ? `${style["nav-link"]} ${style["active"]}`
+              : style["nav-link"]
+          }
+        >
           <TfiMenuAlt />
           DANH SÁCH TRÚNG GIẢI
-        </Link>
-        <Link to="/spin-page" className={style["nav-link"]}>
+        </NavLink>
+        <NavLink
+          to="/spin-page"
+          className={({ isActive }) =>
+            isActive
+              ? `${style["nav-link"]} ${style["active"]}`
+              : style["nav-link"]
+          }
+        >
           <TfiMenuAlt />
           LINK QUAY SỐ
-        </Link>
+        </NavLink>
       </nav>
       <Outlet />
     </div>

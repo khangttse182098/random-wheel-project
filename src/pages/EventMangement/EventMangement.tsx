@@ -1,22 +1,28 @@
-import { Button, TimePicker } from "antd";
+import { Button, DatePicker, Form, Input, Modal, Select } from "antd";
 import Search from "antd/es/input/Search";
 import { ColumnType } from "antd/es/table";
+import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { FaPlus, FaRegCheckCircle, FaWrench } from "react-icons/fa";
-import { ImCancelCircle } from "react-icons/im";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
-import { EventData, UpdateEventData } from "../../models/event";
-import { getEventList, updateEvent } from "../../service/event/api";
+import {
+  CreateEventData,
+  EventData,
+  UpdateEventData,
+} from "../../models/event";
+import { addEvent, getEventList, updateEvent } from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
 import { formatDate } from "../../utils/dateUtils";
 import style from "./EventMangement.module.scss";
-import dayjs from "dayjs";
+import { useForm } from "antd/es/form/Form";
 
 const EventMangement = () => {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [form] = useForm();
   const [eventData, setEventData] = useState<EventData[]>([]);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingRecord, setEditingRecord] = useState<EventData | null>(null);
@@ -52,7 +58,7 @@ const EventMangement = () => {
         const payload: UpdateEventData = {
           name: originalRecord.name,
           expiryDate: originalRecord.expiryDate,
-          status: originalRecord.status === "Active" ? true : false,
+          status: originalRecord.status,
         };
 
         if (editingRecord.name !== originalRecord.name) {
@@ -62,7 +68,7 @@ const EventMangement = () => {
           payload.expiryDate = editingRecord.expiryDate;
         }
         if (editingRecord.status !== originalRecord.status) {
-          payload.status = editingRecord.status === "Active" ? true : false;
+          payload.status = editingRecord.status;
         }
 
         if (Object.keys(payload).length === 0) {
@@ -84,6 +90,25 @@ const EventMangement = () => {
     [editingRecord, fetchEventList]
   );
 
+  const handleCreateEvent = useCallback(async () => {
+    try {
+      const name = form.getFieldValue("name");
+      const expiryDate = form.getFieldValue("expiryDate");
+      const payload: CreateEventData = {
+        name: name,
+        createdAt: new Date().toISOString(),
+        expiryDate: expiryDate.toISOString(),
+      };
+      await addEvent(payload);
+      toast.success("Tạo sự kiện thành công!");
+      setShowModal(false);
+      fetchEventList();
+      form.resetFields();
+    } catch (error) {
+      toast.error("Lỗi khi tạo sự kiện!");
+    }
+  }, [eventData]);
+
   const handleEditDetails = (record: EventData) => {
     setEditingKey(record.id);
     setEditingRecord({ ...record });
@@ -103,19 +128,51 @@ const EventMangement = () => {
     {
       title: "Tên sự kiện",
       dataIndex: "name",
+      render: (_, record) =>
+        editingKey === record.id ? (
+          <Input
+            value={editingRecord?.name}
+            onChange={(e) =>
+              setEditingRecord((prev) =>
+                prev ? { ...prev, name: e.target.value } : prev
+              )
+            }
+          />
+        ) : (
+          <div>{record.name}</div>
+        ),
     },
     {
       title: "Tình trạng",
       dataIndex: "status",
       render: (_, record) => {
-        let color = "#66a3ff";
-        let text = "Đang hoạt động";
-        let icon = <FaRegCheckCircle style={{ marginRight: "5px" }} />;
-        if (record.status === "disabled") {
-          color = "#ff6666";
-          text = "Không hoạt động";
-          icon = <ImCancelCircle style={{ marginRight: "5px" }} />;
+        if (editingKey === record.id) {
+          return (
+            <Select
+              value={editingRecord?.status}
+              onChange={(value) =>
+                setEditingRecord((prev) =>
+                  prev ? { ...prev, status: value } : prev
+                )
+              }
+            >
+              <Select.Option value={true}>Hoạt động</Select.Option>
+              <Select.Option value={false}>Tạm ngưng</Select.Option>
+            </Select>
+          );
         }
+
+        // Hiển thị trạng thái với màu sắc và icon khi không chỉnh sửa
+        let color = "#66a3ff";
+        let text = "Hoạt động";
+        let icon = <FaRegCheckCircle style={{ marginRight: "5px" }} />;
+
+        if (record.status === false) {
+          color = "#ff6666";
+          text = "Tạm ngưng";
+          icon = <IoIosCloseCircleOutline style={{ marginRight: "5px" }} />;
+        }
+
         return (
           <div
             style={{
@@ -141,26 +198,25 @@ const EventMangement = () => {
     {
       title: "Ngày tạo",
       dataIndex: "createdAt",
-      render: (_, record) =>
-        editingKey === record.createdAt ? (
-          <TimePicker
-            value={dayjs(editingRecord?.createdAt)}
-            onChange={(time: any) =>
-              setEditingRecord((prev) =>
-                prev ? { ...prev, createdAt: time } : prev
-              )
-            }
-          />
-        ) : (
-          formatDate(record.createdAt)
-        ),
+      render: (_, record) => formatDate(record.createdAt),
     },
     {
       title: "Ngày hết hạn",
       dataIndex: "expiryDate",
-      render: (_, record) => {
-        return <div>{formatDate(record.expiryDate)}</div>;
-      },
+      render: (_, record) =>
+        editingKey === record.id ? (
+          <DatePicker
+            value={dayjs(editingRecord?.expiryDate)}
+            format="DD/MM/YYYY"
+            onChange={(time: any) =>
+              setEditingRecord((prev) =>
+                prev ? { ...prev, expiryDate: time } : prev
+              )
+            }
+          />
+        ) : (
+          formatDate(record.expiryDate)
+        ),
     },
     {
       title: "Chức năng",
@@ -206,6 +262,7 @@ const EventMangement = () => {
               variant="solid"
               onClick={() => {
                 addChooseEvent({
+                  id: eventData.id,
                   name: eventData.name,
                   created_at: eventData.createdAt,
                   expiry_date: eventData.expiryDate,
@@ -232,6 +289,9 @@ const EventMangement = () => {
           color="primary"
           variant="solid"
           icon={<FaPlus />}
+          onClick={() => {
+            setShowModal(true);
+          }}
         >
           Tạo sự kiện
         </Button>
@@ -240,6 +300,46 @@ const EventMangement = () => {
       </div>
       {/* table */}
       <AntDCustomTable columns={columns} dataSource={eventData} />
+      <Modal
+        onCancel={() => {
+          setShowModal(false);
+        }}
+        open={showModal}
+        footer={[
+          <Button
+            key="back"
+            onClick={() => {
+              setShowModal(false);
+            }}
+          >
+            Hủy
+          </Button>,
+          <Button type="primary" onClick={() => handleCreateEvent()}>
+            Tạo
+          </Button>,
+        ]}
+      >
+        <Form form={form} labelCol={{ span: 24 }} style={{ rowGap: "16px" }}>
+          <Form.Item
+            name="name"
+            label="Tên sự kiện"
+            style={{ marginBottom: "16px" }}
+          >
+            <Input placeholder="Nhập tên sự kiện" />
+          </Form.Item>
+          <Form.Item
+            name="expiryDate"
+            label="Ngày hết hạn"
+            style={{ marginBottom: "16px" }}
+          >
+            <DatePicker
+              format="DD/MM/YYYY"
+              placeholder="Chọn ngày hết hạn"
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

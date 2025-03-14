@@ -2,7 +2,7 @@ import { ImCross } from "react-icons/im";
 import { FaRegFileExcel } from "react-icons/fa";
 import { ColumnType } from "antd/es/table";
 import style from "./WinnerList.module.scss";
-import { Button, Modal } from "antd";
+import { Button } from "antd";
 import Search from "antd/es/input/Search";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 
@@ -12,7 +12,7 @@ const WinnerList = () => {
       title: "STT",
       dataIndex: "index",
       key: "index",
-      render: (text: string, record: any, index: number) => index + 1,
+      render: (_: string, __: any, index: number) => index + 1,
     },
     {
       title: "Ngày trúng thưởng",

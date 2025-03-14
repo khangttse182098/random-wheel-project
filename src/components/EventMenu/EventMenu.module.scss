@@ -31,6 +31,12 @@ $text-color: #525252;
   display: flex;
   align-items: center;
   gap: 10;
+  &.active {
+    background: linear-gradient(135deg, #2774c7, #4a90e2);
+    border-radius: 16px;
+    color: white;
+    padding: 5px;
+  }
 }
 
 .nav-link:hover {
