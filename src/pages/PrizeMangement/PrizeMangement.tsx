@@ -7,6 +7,10 @@ import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import { ColumnType } from "antd/es/table";
 
 const PrizeMangement = () => {
+  const handleSearchValue = (value: string) => {
+  }
+
+
   const columns: ColumnType[] = [
     {
       title: "STT",
@@ -84,7 +88,7 @@ const PrizeMangement = () => {
           </Button>
         </div>
         {/* search */}
-        <Search className={style["search__input"]} />
+        <Search className={style["search__input"]} onChange={(e) => handleSearchValue(e.target.value)}/>
       </div>
       {/* table */}
       <AntDCustomTable columns={columns} dataSource={data} />{" "}
