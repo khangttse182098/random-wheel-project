@@ -73,12 +73,12 @@ const ContestantList = () => {
   };
 
   const handleSaveParticipantList = useCallback(async () => {
-    if (participantList.length === 0) {
+    if (participantList!.length === 0) {
       toast.info("Không có dữ liệu để lưu");
       return;
     }
     try {
-      const savedData: CreateParticipantData[] = participantList.map(
+      const savedData: CreateParticipantData[] = participantList!.map(
         (item) => ({
           code: item.code,
           fullName: item.fullName,
@@ -99,7 +99,7 @@ const ContestantList = () => {
       await deleteParticipant([id]);
       toast.success("Xóa người tham dự thành công");
       //filter out deleted participant
-      const newParticipantList = participantList.filter(
+      const newParticipantList = participantList!.filter(
         (item) => item.id != id
       );
       setParticipantList(newParticipantList);
@@ -110,7 +110,7 @@ const ContestantList = () => {
 
   const handleDeleteAllParticipant = async () => {
     try {
-      const idsToDelete = participantList
+      const idsToDelete = participantList!
         .map((item) => item.id)
         .filter((id): id is string => id !== undefined);
       await deleteParticipant(idsToDelete);
@@ -138,7 +138,7 @@ const ContestantList = () => {
           return;
         }
 
-        const originalRecord = participantList.find((item) => item.id === id);
+        const originalRecord = participantList!.find((item) => item.id === id);
         if (!originalRecord) return;
 
         // Chỉ lấy 3 trường cần cập nhật
@@ -172,7 +172,7 @@ const ContestantList = () => {
         setEditingRecord(null);
 
         //update participantList locally
-        const newParticipantList = participantList.map((item) => {
+        const newParticipantList = participantList!.map((item) => {
           if (item.id == id) return { ...item, ...payload };
           return item;
         });
@@ -341,7 +341,7 @@ const ContestantList = () => {
         <Search className={style["search__input"]} />
       </div>
       {/* table */}
-      <AntDCustomTable columns={columns} dataSource={participantList} />
+      <AntDCustomTable columns={columns} dataSource={participantList!} />
       <Modal
         onCancel={() => {
           setShowModal(false);

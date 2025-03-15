@@ -25,3 +25,8 @@ export const getConfigureEvent = (eventId: string) => {
 export const getRewardList = (eventId: string) => {
   return api.get(`/api/v1/rewards/event/${eventId}`);
 };
+
+//danh sách trúng giải
+export const getWinnerList = (eventId: string) => {
+  return api.get(`/api/v1/reward-winner/event/${eventId}`);
+};

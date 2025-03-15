@@ -18,6 +18,8 @@ import {
   addEvent,
   getConfigureEvent,
   getEventList,
+  getRewardList,
+  getWinnerList,
   updateEvent,
 } from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
@@ -34,9 +36,13 @@ const EventMangement = () => {
   const [editingRecord, setEditingRecord] = useState<EventData | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { addChooseEvent, setParticipantList, setEventSetting } = useAppStore(
-    (state) => state
-  );
+  const {
+    addChooseEvent,
+    setParticipantList,
+    setEventSetting,
+    setRewardList,
+    setWinnerList,
+  } = useAppStore((state) => state);
 
   //get event list
   const fetchEventList = useCallback(async () => {
@@ -63,6 +69,35 @@ const EventMangement = () => {
     [setParticipantList]
   );
 
+  //get reward list
+  const fetchRewardList = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getRewardList(eventID);
+        const data = res.data.data;
+        setRewardList(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy danh sách giải quay");
+      }
+    },
+    [setRewardList]
+  );
+
+  //get winner list
+  const fetchWinnerList = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getWinnerList(eventID!);
+        const data = res.data.data;
+        setWinnerList(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy cấu hình sự kiện");
+      }
+    },
+    [setWinnerList]
+  );
+
+  //get event setting
   const fetchEventSetting = useCallback(
     async (eventID: string) => {
       try {
@@ -315,6 +350,8 @@ const EventMangement = () => {
                 });
                 fetchParticipantList(eventData.id);
                 fetchEventSetting(eventData.id);
+                fetchRewardList(eventData.id);
+                fetchWinnerList(eventData.id);
                 navigate("/event-setting");
               }}
             >
