@@ -7,3 +7,11 @@ export interface RewardData {
   status: string;
   createdAt: string;
 }
+
+export interface CreateRewardData {
+  eventId: string;
+  name: string;
+  rollingNumber: number;
+  winnerNumber: number;
+  createdAt: string;
+}

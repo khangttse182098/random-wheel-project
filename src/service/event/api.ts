@@ -1,6 +1,7 @@
 import api from "../../config/axios";
 import { CreateEventData, UpdateEventData } from "../../models/event";
 import { UpdateEventSettingData } from "../../models/eventSetting";
+import { CreateRewardData } from "../../models/reward";
 
 // Danh sách sự kiện
 export const getEventList = () => {
@@ -38,4 +39,9 @@ export const getRewardList = (eventId: string) => {
 //danh sách trúng giải
 export const getWinnerList = (eventId: string) => {
   return api.get(`/api/v1/reward-winner/event/${eventId}`);
+};
+
+// Tạo giải thưởng
+export const createAward = (data: CreateRewardData) => {
+  return api.post("/api/v1/rewards", data);
 };

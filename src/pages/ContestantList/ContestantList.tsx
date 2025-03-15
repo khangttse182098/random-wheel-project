@@ -98,13 +98,12 @@ const ContestantList = () => {
     try {
       await deleteParticipant([id]);
       toast.success("Xóa người tham dự thành công");
-      //filter out deleted participant
       const newParticipantList = participantList!.filter(
         (item) => item.id != id
       );
       setParticipantList(newParticipantList);
-    } catch (error) {
-      toast.error("Lỗi khi xóa người tham dự");
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
     }
   };
 
@@ -115,13 +114,10 @@ const ContestantList = () => {
         .filter((id): id is string => id !== undefined);
       await deleteParticipant(idsToDelete);
       toast.success("Xóa người tham dự thành công");
-
-      //delete all paricipant locally
       setParticipantList([]);
-
       setShowModal(false);
-    } catch (error) {
-      toast.error("Lỗi khi xóa người tham dự");
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
     }
   };
 
