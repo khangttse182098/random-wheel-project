@@ -42,6 +42,7 @@ const EventMangement = () => {
     setEventSetting,
     setRewardList,
     setWinnerList,
+    resetAllEventData,
   } = useAppStore((state) => state);
 
   //get event list
@@ -342,6 +343,7 @@ const EventMangement = () => {
               color="danger"
               variant="solid"
               onClick={() => {
+                resetAllEventData();
                 addChooseEvent({
                   id: eventData.id,
                   name: eventData.name,

@@ -30,18 +30,19 @@ interface StoreType {
   setParticipantList: (newParticipantList: Participant[]) => void;
   setUser: (newUser: UserType) => void;
   addChooseEvent: (event: EventType) => void;
+  resetAllEventData: () => void;
 }
 
 const useAppStore = create<StoreType>()(
   persist(
     (set) => ({
-      chooseEvent: null,
-      eventSetting: null,
       user: {
         userName: "",
         password: "",
       },
-      participantList: [],
+      chooseEvent: null,
+      eventSetting: null,
+      participantList: null,
       rewardList: null,
       winnerList: null,
       setWinnerList: (newWinnerList) => set({ winnerList: newWinnerList }),
@@ -52,6 +53,14 @@ const useAppStore = create<StoreType>()(
         set({ participantList: newParticipantList }),
       setUser: (newUser) => set({ user: newUser }),
       addChooseEvent: (event) => set({ chooseEvent: event }),
+      resetAllEventData: () =>
+        set({
+          chooseEvent: null,
+          eventSetting: null,
+          participantList: null,
+          rewardList: null,
+          winnerList: null,
+        }),
     }),
     {
       name: "EventData",
