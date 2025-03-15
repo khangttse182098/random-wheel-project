@@ -14,6 +14,10 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
+      element: <SignIn />,
+    },
+    {
+      path: "/",
       element: <HomeLayout />,
       children: [
         {
@@ -47,10 +51,6 @@ function App() {
           element: <WinnerList />,
         },
       ],
-    },
-    {
-      path: "/login",
-      element: <SignIn />,
     },
     {
       path: "/spin-page",

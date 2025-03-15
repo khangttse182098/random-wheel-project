@@ -8,8 +8,15 @@ export interface EventType {
   expiry_date: string;
 }
 
+export interface UserType {
+  userName: string;
+  password: string;
+}
+
 interface StoreType {
   chooseEvent: EventType | null;
+  user: UserType;
+  setUser: (newUser: UserType) => void;
   addChooseEvent: (event: EventType) => void;
 }
 
@@ -17,6 +24,11 @@ const useAppStore = create<StoreType>()(
   persist(
     (set) => ({
       chooseEvent: null,
+      user: {
+        userName: "",
+        password: "",
+      },
+      setUser: (newUser) => set({ user: newUser }),
       addChooseEvent: (event) => set({ chooseEvent: event }),
     }),
     {
