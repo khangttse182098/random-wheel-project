@@ -1,23 +1,26 @@
 import { useState } from "react";
 import RollingSlot from "../../components/RollingSlot/RollingSlot";
 import style from "./SpinPage.module.scss";
-
-const mockData = ["AI4SZ", "01234", "LMFAO"];
+import useAppStore from "../../store/useAppStore";
 
 //NHỚ SỬA MOCKDATA THÀNH VALUE KHI SỬA LẠI BÊN TRANG EVENT-SETTING
-const SpinPage = (/*{ value }: { value: string[] }*/) => {
+const SpinPage = () => {
+  const { participantList } = useAppStore.getState();
+  const codeList = participantList.map((item) => item.code);
   const [code, setCode] = useState<string[]>(
-    Array(mockData[0].length).fill("")
+    Array(codeList[0].length).fill("")
   );
   const [previousCode, setPreviousCode] = useState<string[]>(
-    Array(mockData[0].length).fill("0")
+    Array(codeList[0].length).fill("0")
   );
   const [spinKey, setSpinKey] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
 
   const handldeGetRandomCode = () => {
     // const selectedCode = value[Math.floor(Math.random() * value.length)];
-    const selectedCode = mockData[Math.floor(Math.random() * mockData.length)];
+    const selectedCode = codeList[Math.floor(Math.random() * codeList.length)];
+    console.log(selectedCode);
+
     return selectedCode.split("");
   };
 
