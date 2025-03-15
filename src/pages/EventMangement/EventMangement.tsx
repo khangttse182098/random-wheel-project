@@ -19,6 +19,7 @@ import useAppStore from "../../store/useAppStore";
 import { formatDate } from "../../utils/dateUtils";
 import style from "./EventMangement.module.scss";
 import { useForm } from "antd/es/form/Form";
+import { getParticipantList } from "../../service/participant/api";
 
 const EventMangement = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -28,8 +29,9 @@ const EventMangement = () => {
   const [editingRecord, setEditingRecord] = useState<EventData | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { addChooseEvent } = useAppStore((state) => state);
+  const { addChooseEvent, setParticipantList } = useAppStore((state) => state);
 
+  //get event list
   const fetchEventList = useCallback(async () => {
     try {
       const res = await getEventList();
@@ -40,6 +42,20 @@ const EventMangement = () => {
     }
   }, []);
 
+  //get contestant list
+  const fetchParticipantList = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getParticipantList(eventID!);
+        const data = res.data.data;
+        setParticipantList(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy danh sách người tham gia");
+      }
+    },
+    [setParticipantList]
+  );
+
   //load error if any
   useEffect(() => {
     if (location.state?.error) {
@@ -48,11 +64,8 @@ const EventMangement = () => {
       // Clear the error from location.state
       navigate(location.pathname, { replace: true, state: {} });
     }
-  });
-
-  useEffect(() => {
     fetchEventList();
-  }, []);
+  });
 
   const handleUpdateEvent = useCallback(
     async (id: string) => {
@@ -278,6 +291,7 @@ const EventMangement = () => {
                   created_at: eventData.createdAt,
                   expiry_date: eventData.expiryDate,
                 });
+                fetchParticipantList(eventData.id);
                 navigate("/event-setting");
               }}
             >

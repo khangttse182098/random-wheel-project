@@ -8,8 +8,6 @@ import {
   Image,
   Modal,
   Row,
-  Select,
-  Tooltip,
   Typography,
   Upload,
 } from "antd";
@@ -35,8 +33,6 @@ const EventSetting = () => {
   const [settingEventData, setSettingEventData] = useState(null);
   const { chooseEvent } = useAppStore((state) => state);
   const eventID = chooseEvent?.id;
-  const [slotCount, setSlotCount] = useState(7);
-  const [drawType, setDrawType] = useState("both");
   const [colorBg, setColorBg] = useState<Color>("#1677ff");
   const [colorButton, setColorButton] = useState<Color>("#1677ff");
   const [colorDigit, setColorDigit] = useState<Color>("#1677ff");
@@ -105,7 +101,6 @@ const EventSetting = () => {
 
   // information for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalOpenAdvanced, setIsModalOpenAdvanced] = useState(false);
   const [isModalOpenShow, setIsModalOpenShow] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
@@ -121,10 +116,6 @@ const EventSetting = () => {
     setIsModalOpen(true);
   };
 
-  const showModalAdvanced = () => {
-    setIsModalOpenAdvanced(true);
-  };
-
   const showModalShow = () => {
     setIsModalOpenShow(true);
   };
@@ -133,20 +124,12 @@ const EventSetting = () => {
     setIsModalOpen(false);
   };
 
-  const handleOKAdvanced = () => {
-    setIsModalOpenAdvanced(false);
-  };
-
   const handleOKShow = () => {
     setIsModalOpenShow(false);
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
-  };
-
-  const handleCancelAdvanced = () => {
-    setIsModalOpenAdvanced(false);
   };
 
   const handleCancelShow = () => {
@@ -161,13 +144,15 @@ const EventSetting = () => {
     } catch (error) {
       toast.error("Lỗi khi lấy cấu hình sự kiện");
     }
-  }, []);
+  }, [eventID]);
 
   const transformedData = settingEventData ? [settingEventData] : [];
 
   useEffect(() => {
+    //get slot count from zustand participant list
+
     fetchEventSetting();
-  }, []);
+  }, [fetchEventSetting]);
 
   const firstColumn: ColumnType[] = [
     {
@@ -181,24 +166,25 @@ const EventSetting = () => {
       render: (_, record) => <Image width={100} src={record.backgroundImage} />,
     },
     // Trường này ko ảnh hưởng gì (cân nhắc xóa)
-    // {
-    //   title: "Màu nền",
-    //   dataIndex: "backgroundColor",
-    //   render: (_, record) => (
-    //     <div
-    //       style={{
-    //         backgroundColor: record.backgroundColor,
-    //       }}
-    //       className={style["color__opt"]}
-    //     ></div>
-    //   ),
-    // },
+    {
+      title: "Màu nền",
+      dataIndex: "backgroundColor",
+      render: (_, record) => (
+        <div
+          style={{
+            backgroundColor: record.backgroundColor,
+          }}
+          className={style["color__opt"]}
+        ></div>
+      ),
+    },
     {
       title: "Màu nút bấm",
       dataIndex: "buttonColor",
       render: (_, record) => (
         <div
           style={{
+            backgroundImage: record.buttonColor,
             backgroundColor: record.buttonColor,
           }}
           className={style["color__opt"]}
@@ -211,6 +197,7 @@ const EventSetting = () => {
       render: (_, record) => (
         <div
           style={{
+            backgroundImage: record.numberBackgroundColor,
             backgroundColor: record.numberBackgroundColor,
           }}
           className={style["color__opt"]}
@@ -313,26 +300,6 @@ const EventSetting = () => {
       title: "Loại quay số",
       dataIndex: "spinCategory",
     },
-    {
-      // Mặc định quay từng chữ số, không cho thay đổi
-      title: "Kiểu quay số",
-      dataIndex: "spinType",
-    },
-    {
-      title: "",
-      dataIndex: "setting",
-      render: () => (
-        <Button
-          icon={<FaWrench />}
-          className={style["setting__opt"]}
-          color="danger"
-          variant="solid"
-          onClick={showModalAdvanced}
-        >
-          Cài đặt
-        </Button>
-      ),
-    },
   ];
 
   return (
@@ -358,7 +325,7 @@ const EventSetting = () => {
         />
       </div>
       <div className={style["wrapper"]}>
-        <p className={style["title"]}>Cài đặt kiểu quay số</p>
+        <p className={style["title"]}>Kiểu quay số</p>
         <Divider className={style["divider"]} />
         <AntDCustomTable
           columns={thirdColumn}
@@ -407,65 +374,6 @@ const EventSetting = () => {
           </Button>
         </div>
       </Modal>
-      {/* type roll number modal */}
-      <Modal
-        title="CÀI ĐẶT NÂNG CAO"
-        open={isModalOpenAdvanced}
-        onOk={handleOKAdvanced}
-        onCancel={handleCancelAdvanced}
-        footer={null}
-      >
-        <hr></hr>
-        <div className={style["advanced__setting"]}>
-          <div style={{ marginBottom: 16 }}>
-            <Typography.Text strong>
-              SỐ LƯỢNG Ô: <Tooltip title="Số lượng ô quay số"></Tooltip>
-            </Typography.Text>
-            <Select
-              value={slotCount}
-              onChange={setSlotCount}
-              style={{ width: "100%", marginTop: 4 }}
-              options={Array.from({ length: 10 }, (_, i) => ({
-                value: i + 1,
-                label: i + 1,
-              }))}
-            />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <Typography.Text strong>LOẠI QUAY SỐ:</Typography.Text>
-            <Select
-              value={drawType}
-              onChange={setDrawType}
-              style={{ width: "100%", marginTop: 4 }}
-              options={[
-                { value: "numbers", label: "Chỉ quay số" },
-                { value: "letters", label: "Chỉ quay chữ" },
-                { value: "both", label: "Quay bao gồm cả số và chữ" },
-              ]}
-            />
-          </div>
-        </div>
-        <div className={style["advanced__setting__button"]}>
-          <Button
-            type="primary"
-            style={{ backgroundColor: "#c82333" }}
-            onClick={handleCancelAdvanced}
-          >
-            Đóng
-          </Button>
-          <Button
-            type="primary"
-            onClick={handleOKAdvanced}
-            style={{
-              backgroundColor: "rgb(21, 120, 21)",
-              borderColor: "#28a745",
-            }}
-          >
-            Lưu
-          </Button>
-        </div>
-      </Modal>
-
       {/* modal for CÀI ĐẶT TRÌNH BÀY */}
       <Modal
         open={isModalOpenShow}
