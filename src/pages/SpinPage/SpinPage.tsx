@@ -3,9 +3,8 @@ import RollingSlot from "../../components/RollingSlot/RollingSlot";
 import style from "./SpinPage.module.scss";
 import useAppStore from "../../store/useAppStore";
 
-//NHỚ SỬA MOCKDATA THÀNH VALUE KHI SỬA LẠI BÊN TRANG EVENT-SETTING
 const SpinPage = () => {
-  const { participantList } = useAppStore.getState();
+  const { participantList, eventSetting } = useAppStore.getState();
   const codeList = participantList.map((item) => item.code);
   const [code, setCode] = useState<string[]>(
     Array(codeList[0].length).fill("")
@@ -17,7 +16,6 @@ const SpinPage = () => {
   const [isSpinning, setIsSpinning] = useState(false);
 
   const handldeGetRandomCode = () => {
-    // const selectedCode = value[Math.floor(Math.random() * value.length)];
     const selectedCode = codeList[Math.floor(Math.random() * codeList.length)];
     console.log(selectedCode);
 
@@ -44,7 +42,17 @@ const SpinPage = () => {
 
   return (
     <div className={style["container"]}>
-      <h2>Máy Quay Số</h2>
+      <div className={style["img-container"]}>
+        <img src={eventSetting?.logo} alt="logo" />
+      </div>
+      <h2
+        style={
+          { "--titleText": eventSetting?.textColor } as React.CSSProperties
+        }
+        className={style["title"]}
+      >
+        Lucky Draw
+      </h2>
       <div className={style["slot-machine"]}>
         {code.map((num, index) => (
           <RollingSlot
@@ -55,7 +63,17 @@ const SpinPage = () => {
           />
         ))}
       </div>
-      <button onClick={spin} disabled={isSpinning}>
+      <button
+        onClick={spin}
+        disabled={isSpinning}
+        style={
+          {
+            "--buttonBg": eventSetting?.buttonColor,
+            "--buttonText": eventSetting?.textColor,
+          } as React.CSSProperties
+        }
+        className={style["button"]}
+      >
         Quay
       </button>
     </div>
