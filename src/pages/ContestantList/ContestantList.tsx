@@ -1,7 +1,7 @@
 import { Button, Input, Modal, Popconfirm } from "antd";
 import Search from "antd/es/input/Search";
 import { ColumnType } from "antd/es/table";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { CiCircleAlert } from "react-icons/ci";
 import { FaRegCheckCircle, FaRegFileExcel, FaRegSave } from "react-icons/fa";
