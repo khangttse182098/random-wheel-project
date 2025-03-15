@@ -20,3 +20,8 @@ export const addEvent = (data: CreateEventData) => {
 export const getConfigureEvent = (eventId: string) => {
   return api.get(`/api/v1/event-settings/event/${eventId}`);
 };
+
+// Giải quay
+export const getRewardList = (eventId: string) => {
+  return api.get(`/api/v1/rewards/event/${eventId}`);
+};
