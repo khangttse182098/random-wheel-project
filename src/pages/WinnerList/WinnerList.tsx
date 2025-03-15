@@ -1,15 +1,24 @@
-import { ImCross } from "react-icons/im";
-import { FaRegFileExcel } from "react-icons/fa";
-import { ColumnType } from "antd/es/table";
-import style from "./WinnerList.module.scss";
 import { Button } from "antd";
 import Search from "antd/es/input/Search";
+import { ColumnType } from "antd/es/table";
+import { FaRegFileExcel } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
-import useAppStore from "../../store/useAppStore";
 import { WinnerData } from "../../models/winner";
+import useAppStore from "../../store/useAppStore";
+import style from "./WinnerList.module.scss";
 
 const WinnerList = () => {
   const { winnerList } = useAppStore.getState();
+  
+  // const handleDeleteWinner = async () => {
+  //   try {
+      
+  //   } catch (error) {
+  //     toast.error("Lỗi khi xóa danh sách trúng giải")
+  //   }
+  // }
+ 
   const columns: ColumnType[] = [
     {
       title: "STT",
