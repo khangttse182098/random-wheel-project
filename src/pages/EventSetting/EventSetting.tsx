@@ -12,12 +12,10 @@ import {
   Upload,
 } from "antd";
 import { ColumnType } from "antd/es/table";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FaCheck, FaWrench } from "react-icons/fa";
 import { ImCross } from "react-icons/im";
-import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
-import { getConfigureEvent } from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
 import style from "./EventSetting.module.scss";
 
@@ -30,9 +28,8 @@ const EventSetting = () => {
   const onChange: CheckboxProps["onChange"] = (e) => {
     console.log(`checked = ${e.target.checked}`);
   };
-  const [settingEventData, setSettingEventData] = useState(null);
-  const { chooseEvent } = useAppStore((state) => state);
-  const eventID = chooseEvent?.id;
+  // const [settingEventData, setSettingEventData] = useState(null);
+  const { eventSetting } = useAppStore((state) => state);
   const [colorBg, setColorBg] = useState<Color>("#1677ff");
   const [colorButton, setColorButton] = useState<Color>("#1677ff");
   const [colorDigit, setColorDigit] = useState<Color>("#1677ff");
@@ -136,23 +133,17 @@ const EventSetting = () => {
     setIsModalOpenShow(false);
   };
 
-  const fetchEventSetting = useCallback(async () => {
-    try {
-      const res = await getConfigureEvent(eventID!);
-      const data = res.data.data;
-      setSettingEventData(data);
-    } catch (error) {
-      toast.error("Lỗi khi lấy cấu hình sự kiện");
-    }
-  }, [eventID]);
+  // const fetchEventSetting = useCallback(async () => {
+  //   try {
+  //     const res = await getConfigureEvent(eventID!);
+  //     const data = res.data.data;
+  //     setSettingEventData(data);
+  //   } catch (error) {
+  //     toast.error("Lỗi khi lấy cấu hình sự kiện");
+  //   }
+  // }, [eventID]);
 
-  const transformedData = settingEventData ? [settingEventData] : [];
-
-  useEffect(() => {
-    //get slot count from zustand participant list
-
-    fetchEventSetting();
-  }, [fetchEventSetting]);
+  const transformedData = eventSetting ? [eventSetting] : [];
 
   const firstColumn: ColumnType[] = [
     {
