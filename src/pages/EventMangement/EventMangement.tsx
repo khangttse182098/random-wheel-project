@@ -14,7 +14,12 @@ import {
   EventData,
   UpdateEventData,
 } from "../../models/event";
-import { addEvent, getEventList, updateEvent } from "../../service/event/api";
+import {
+  addEvent,
+  getConfigureEvent,
+  getEventList,
+  updateEvent,
+} from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
 import { formatDate } from "../../utils/dateUtils";
 import style from "./EventMangement.module.scss";
@@ -29,7 +34,9 @@ const EventMangement = () => {
   const [editingRecord, setEditingRecord] = useState<EventData | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { addChooseEvent, setParticipantList } = useAppStore((state) => state);
+  const { addChooseEvent, setParticipantList, setEventSetting } = useAppStore(
+    (state) => state
+  );
 
   //get event list
   const fetchEventList = useCallback(async () => {
@@ -56,6 +63,19 @@ const EventMangement = () => {
     [setParticipantList]
   );
 
+  const fetchEventSetting = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getConfigureEvent(eventID!);
+        const data = res.data.data;
+        setEventSetting(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy cấu hình sự kiện");
+      }
+    },
+    [setEventSetting]
+  );
+
   //load error if any
   useEffect(() => {
     if (location.state?.error) {
@@ -64,8 +84,10 @@ const EventMangement = () => {
       // Clear the error from location.state
       navigate(location.pathname, { replace: true, state: {} });
     }
+  }, [location]);
+  useEffect(() => {
     fetchEventList();
-  });
+  }, []);
 
   const handleUpdateEvent = useCallback(
     async (id: string) => {
@@ -292,6 +314,7 @@ const EventMangement = () => {
                   expiry_date: eventData.expiryDate,
                 });
                 fetchParticipantList(eventData.id);
+                fetchEventSetting(eventData.id);
                 navigate("/event-setting");
               }}
             >

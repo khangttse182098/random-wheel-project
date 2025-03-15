@@ -19,7 +19,6 @@ import {
 import {
   createParticipant,
   deleteParticipant,
-  // getParticipantList,
   updateParticipant,
 } from "../../service/participant/api";
 import useAppStore from "../../store/useAppStore";
@@ -73,20 +72,6 @@ const ContestantList = () => {
     );
   };
 
-  // const fetchParticipantList = useCallback(async () => {
-  //   try {
-  //     const res = await getParticipantList(eventID!);
-  //     const data = res.data.data;
-  //     setParticipantData(data);
-  //   } catch (error) {
-  //     toast.error("Lỗi khi lấy danh sách người tham gia");
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   fetchParticipantList();
-  // }, []);
-
   const handleSaveParticipantList = useCallback(async () => {
     if (participantList.length === 0) {
       toast.info("Không có dữ liệu để lưu");
@@ -113,8 +98,6 @@ const ContestantList = () => {
     try {
       await deleteParticipant([id]);
       toast.success("Xóa người tham dự thành công");
-      // fetchParticipantList();
-
       //filter out deleted participant
       const newParticipantList = participantList.filter(
         (item) => item.id != id
@@ -132,7 +115,6 @@ const ContestantList = () => {
         .filter((id): id is string => id !== undefined);
       await deleteParticipant(idsToDelete);
       toast.success("Xóa người tham dự thành công");
-      //fetchParticipantList();
 
       //delete all paricipant locally
       setParticipantList([]);
@@ -188,7 +170,6 @@ const ContestantList = () => {
         toast.success("Cập nhật người tham dự thành công");
         setEditingKey(null);
         setEditingRecord(null);
-        // fetchParticipantList();
 
         //update participantList locally
         const newParticipantList = participantList.map((item) => {
