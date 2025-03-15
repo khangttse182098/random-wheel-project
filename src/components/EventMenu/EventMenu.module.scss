@@ -33,9 +33,9 @@ $text-color: #525252;
   gap: 10;
   &.active {
     background: linear-gradient(135deg, #2774c7, #4a90e2);
-    border-radius: 16px;
+    border-radius: 10px;
     color: white;
-    padding: 5px;
+    padding: 10px;
   }
 }
 

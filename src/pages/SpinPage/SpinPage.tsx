@@ -5,7 +5,7 @@ import useAppStore from "../../store/useAppStore";
 
 const SpinPage = () => {
   const { participantList, eventSetting } = useAppStore.getState();
-  const codeList = participantList.map((item) => item.code);
+  const codeList = participantList!.map((item) => item.code);
   const [code, setCode] = useState<string[]>(
     Array(codeList[0].length).fill("")
   );

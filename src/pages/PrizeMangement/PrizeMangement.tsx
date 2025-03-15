@@ -5,8 +5,11 @@ import { FaPlus } from "react-icons/fa";
 import Search from "antd/es/input/Search";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import { ColumnType } from "antd/es/table";
+import useAppStore from "../../store/useAppStore";
+import { RewardData } from "../../models/reward";
 
 const PrizeMangement = () => {
+  const { rewardList } = useAppStore.getState();
   const columns: ColumnType[] = [
     {
       title: "STT",
@@ -16,15 +19,15 @@ const PrizeMangement = () => {
     },
     {
       title: "Tên giải",
-      dataIndex: "name",
+      dataIndex: "rewardName",
     },
     {
       title: "Thứ tự lần quay",
-      dataIndex: "rolling_order",
+      dataIndex: "rollingNumber",
     },
     {
       title: "Số người trúng/lần quay",
-      dataIndex: "numberWinner",
+      dataIndex: "winnerNumber",
     },
     {
       title: "Trạng thái",
@@ -43,21 +46,6 @@ const PrizeMangement = () => {
           Xoá
         </Button>
       ),
-    },
-  ];
-
-  const data = [
-    {
-      name: "lmao",
-      rolling_order: 2,
-      numberWinner: 5,
-      status: "Chưa quay",
-    },
-    {
-      name: "lmao",
-      rolling_order: 2,
-      numberWinner: 5,
-      status: "Chưa quay",
     },
   ];
 
@@ -87,7 +75,10 @@ const PrizeMangement = () => {
         <Search className={style["search__input"]} />
       </div>
       {/* table */}
-      <AntDCustomTable columns={columns} dataSource={data} />{" "}
+      <AntDCustomTable
+        columns={columns}
+        dataSource={rewardList as RewardData[]}
+      />
     </div>
   );
 };
