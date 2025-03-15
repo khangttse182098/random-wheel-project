@@ -1,5 +1,6 @@
 import api from "../../config/axios";
 import { CreateEventData, UpdateEventData } from "../../models/event";
+import { UpdateEventSettingData } from "../../models/eventSetting";
 
 // Danh sách sự kiện
 export const getEventList = () => {
@@ -19,6 +20,14 @@ export const addEvent = (data: CreateEventData) => {
 // Cấu hình sự kiện
 export const getConfigureEvent = (eventId: string) => {
   return api.get(`/api/v1/event-settings/event/${eventId}`);
+};
+
+// Sửa cấu hình sự kiện
+export const updateEventSetting = (
+  eventSettingId: number,
+  data: UpdateEventSettingData
+) => {
+  return api.put(`/api/v1/event-settings/${eventSettingId}`, data);
 };
 
 // Giải quay

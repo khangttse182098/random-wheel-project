@@ -1,10 +1,11 @@
-import type { CheckboxProps, ColorPickerProps, GetProp } from "antd";
+import type { ColorPickerProps, GetProp } from "antd";
 import {
   Button,
   Checkbox,
   Col,
   ColorPicker,
   Divider,
+  Form,
   Image,
   Modal,
   Row,
@@ -13,9 +14,12 @@ import {
 } from "antd";
 import { ColumnType } from "antd/es/table";
 import { useMemo, useState } from "react";
-import { FaCheck, FaWrench } from "react-icons/fa";
+import { FaCheck, FaWrench } from "react-icons/fa6";
 import { ImCross } from "react-icons/im";
+import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
+import { UpdateEventSettingData } from "../../models/eventSetting";
+import { updateEventSetting } from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
 import style from "./EventSetting.module.scss";
 
@@ -24,77 +28,8 @@ type Color = Extract<
   string | { cleared: any }
 >;
 const EventSetting = () => {
-  // information for checkbox
-  const onChange: CheckboxProps["onChange"] = (e) => {
-    console.log(`checked = ${e.target.checked}`);
-  };
-  // const [settingEventData, setSettingEventData] = useState(null);
   const { eventSetting } = useAppStore((state) => state);
-  const [colorBg, setColorBg] = useState<Color>("#1677ff");
-  const [colorButton, setColorButton] = useState<Color>("#1677ff");
-  const [colorDigit, setColorDigit] = useState<Color>("#1677ff");
-  const [colorText, setColorText] = useState<Color>("#1677ff");
-
-  const bgColor = useMemo<string>(
-    () => (typeof colorBg === "string" ? colorBg : colorBg!.toHexString()),
-    [colorBg]
-  );
-
-  const btnStyle: React.CSSProperties = {
-    backgroundColor: bgColor,
-    color: "white",
-    border: "none",
-    width: "100%",
-    height: "40px",
-    marginTop: "2px",
-  };
-
-  const bgColorButton = useMemo<string>(
-    () =>
-      typeof colorButton === "string"
-        ? colorButton
-        : colorButton!.toHexString(),
-    [colorButton]
-  );
-
-  const btnStyleColorButton: React.CSSProperties = {
-    backgroundColor: bgColorButton,
-    color: "white",
-    border: "none",
-    width: "100%",
-    height: "40px",
-    marginTop: "2px",
-  };
-
-  const bgColorDigit = useMemo<string>(
-    () =>
-      typeof colorDigit === "string" ? colorDigit : colorDigit!.toHexString(),
-    [colorDigit]
-  );
-
-  const btnStyleColorDigit: React.CSSProperties = {
-    backgroundColor: bgColorDigit,
-    color: "white",
-    border: "none",
-    width: "100%",
-    height: "40px",
-    marginTop: "2px",
-  };
-
-  const bgColorText = useMemo<string>(
-    () =>
-      typeof colorText === "string" ? colorText : colorText!.toHexString(),
-    [colorText]
-  );
-
-  const btnStyleColorText: React.CSSProperties = {
-    backgroundColor: bgColorText,
-    color: "white",
-    border: "none",
-    width: "100%",
-    height: "40px",
-    marginTop: "2px",
-  };
+  const [form] = Form.useForm();
 
   // information for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -102,27 +37,12 @@ const EventSetting = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
 
-  // Handle file upload
-  // const handleUpload = (info: any, setImage: any) => {
-  //   if (info.file.status === "done") {
-  //     setImage(URL.createObjectURL(info.file.originFileObj));
-  //   }
-  // };
-
   const showModal = () => {
     setIsModalOpen(true);
   };
 
   const showModalShow = () => {
     setIsModalOpenShow(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleOKShow = () => {
-    setIsModalOpenShow(false);
   };
 
   const handleCancel = () => {
@@ -144,6 +64,129 @@ const EventSetting = () => {
   // }, [eventID]);
 
   const transformedData = eventSetting ? [eventSetting] : [];
+
+  // -------------------------------------- Phần Cài đặt trình bày ---------------------------------------
+  const [colorBg, setColorBg] = useState<Color>(eventSetting!.backgroundColor);
+  const [colorButton, setColorButton] = useState<Color>(
+    eventSetting!.buttonColor
+  );
+  const [colorDigit, setColorDigit] = useState<Color>(
+    eventSetting!.numberBackgroundColor
+  );
+  const [colorText, setColorText] = useState<Color>(eventSetting!.textColor);
+  const extractColorsFromGradient = (gradient: string): string[] => {
+    const regex = /#([0-9a-f]{3,6})/gi;
+    return gradient.match(regex) || [];
+  };
+
+  // Màu nền
+  const bgColor = useMemo<string>(
+    () => (typeof colorBg === "string" ? colorBg : colorBg.toHexString()),
+    [colorBg]
+  );
+  const btnStyle: React.CSSProperties = {
+    backgroundColor: bgColor,
+    color: "black",
+    border: "variant",
+    width: "100%",
+    height: "40px",
+    marginTop: "2px",
+  };
+
+  // Màu nút bấm
+  const bgColorButton = useMemo<string>(
+    () =>
+      typeof colorButton === "string"
+        ? colorButton
+        : colorButton!.toHexString(),
+    [colorButton]
+  );
+  const btnStyleColorButton: React.CSSProperties = useMemo(() => {
+    const isGradient = bgColorButton.startsWith("linear-gradient");
+    return {
+      backgroundImage: isGradient ? bgColorButton : undefined,
+      backgroundColor: isGradient ? undefined : bgColorButton,
+      color: "white",
+      border: "variant",
+      width: "100%",
+      height: "40px",
+      marginTop: "2px",
+    };
+  }, [bgColorButton]);
+  const buttonColors = useMemo<string[]>(
+    () => extractColorsFromGradient(bgColorButton),
+    [bgColorButton]
+  );
+
+  // Màu nền các số
+  const bgColorDigit = useMemo<string>(
+    () =>
+      typeof colorDigit === "string" ? colorDigit : colorDigit!.toHexString(),
+    [colorDigit]
+  );
+  const btnStyleColorDigit: React.CSSProperties = useMemo(() => {
+    const isGradient = bgColorDigit.startsWith("linear-gradient");
+    return {
+      backgroundImage: isGradient ? bgColorDigit : undefined,
+      backgroundColor: isGradient ? undefined : bgColorDigit,
+      color: "white",
+      border: "variant",
+      width: "100%",
+      height: "40px",
+      marginTop: "2px",
+    };
+  }, [bgColorDigit]);
+  const btnDigitColors = useMemo<string[]>(
+    () => extractColorsFromGradient(bgColorDigit),
+    [bgColorDigit]
+  );
+
+  // Màu chữ
+  const bgColorText = useMemo<string>(
+    () =>
+      typeof colorText === "string" ? colorText : colorText!.toHexString(),
+    [colorText]
+  );
+  const btnStyleColorText: React.CSSProperties = {
+    backgroundColor: bgColorText,
+    color: "black",
+    border: "variant",
+    width: "100%",
+    height: "40px",
+    marginTop: "2px",
+  };
+  // ----------------------------------------------------------------------------------------------------
+
+  // -------------------------------------- Phần Cài đặt hiển thị ---------------------------------------
+  const [showBackground, setShowBackground] = useState<boolean>(
+    eventSetting!.showBackground
+  );
+  const [showLogo, setShowLogo] = useState<boolean>(eventSetting!.showLogo);
+  const [showEventName, setShowEventName] = useState<boolean>(
+    eventSetting!.showEventName
+  );
+  // ----------------------------------------------------------------------------------------------------
+
+  // ----------------------------------------- Phần update ----------------------------------------------
+  const handleUpdateEventSetting = async () => {
+    try {
+      const payload: UpdateEventSettingData = {
+        logo: form.getFieldValue("logo"),
+        backgroundImage: form.getFieldValue("backgroundImage"),
+        backgroundColor: bgColor,
+        buttonColor: bgColorButton,
+        numberBackgroundColor: bgColorDigit,
+        textColor: bgColorText,
+        showBackground,
+        showLogo,
+        showEventName,
+      };
+      await updateEventSetting(eventSetting!.id, payload);
+      toast.success("Cập nhật cấu hình sự kiện thành công");
+    } catch (error) {
+      toast.error("Lỗi khi cấu hình sự kiện");
+    }
+  };
 
   const firstColumn: ColumnType[] = [
     {
@@ -329,19 +372,30 @@ const EventSetting = () => {
       <Modal
         title="CÀI ĐẶT HIỂN THỊ"
         open={isModalOpen}
-        onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
       >
         <hr></hr>
         <div className={style["display__setting"]}>
-          <Checkbox style={{ fontSize: "20px" }} onChange={onChange}>
+          <Checkbox
+            style={{ fontSize: "20px" }}
+            defaultChecked={showBackground}
+            onChange={(e) => setShowBackground(e.target.checked)}
+          >
             Hiển thị hình nền
           </Checkbox>
-          <Checkbox style={{ fontSize: "20px" }} onChange={onChange}>
+          <Checkbox
+            style={{ fontSize: "20px" }}
+            defaultChecked={showLogo}
+            onChange={(e) => setShowLogo(e.target.checked)}
+          >
             Hiển thị logo công ty
           </Checkbox>
-          <Checkbox style={{ fontSize: "20px" }} onChange={onChange}>
+          <Checkbox
+            style={{ fontSize: "20px" }}
+            defaultChecked={showEventName}
+            onChange={(e) => setShowEventName(e.target.checked)}
+          >
             Hiển thị tên sự kiên
           </Checkbox>
         </div>
@@ -355,7 +409,10 @@ const EventSetting = () => {
           </Button>
           <Button
             type="primary"
-            onClick={handleOk}
+            onClick={() => {
+              handleUpdateEventSetting();
+              setIsModalOpen(false);
+            }}
             style={{
               backgroundColor: "rgb(21, 120, 21)",
               borderColor: "#28a745",
@@ -365,10 +422,10 @@ const EventSetting = () => {
           </Button>
         </div>
       </Modal>
+
       {/* modal for CÀI ĐẶT TRÌNH BÀY */}
       <Modal
         open={isModalOpenShow}
-        onOk={handleOKShow}
         onCancel={handleCancelShow}
         footer={null}
         centered
@@ -385,21 +442,23 @@ const EventSetting = () => {
               Ảnh nền (Kích thước khuyến nghị: 1920px X 1080px. Dung lượng {"≤"}{" "}
               5Mb)
             </Typography.Text>
-            <Upload
-              showUploadList={false}
-              customRequest={({ file, onSuccess }) => {
-                if (file && onSuccess) {
-                  setTimeout(() => onSuccess("ok"), 1000);
-                  setBackgroundImage(URL.createObjectURL(file as Blob));
-                }
-              }}
-            >
-              <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
-            </Upload>
+            <Form.Item name="backgroundImage">
+              <Upload
+                showUploadList={false}
+                customRequest={({ file, onSuccess }) => {
+                  if (file && onSuccess) {
+                    setTimeout(() => onSuccess("ok"), 1000);
+                    setBackgroundImage(URL.createObjectURL(file as Blob));
+                  }
+                }}
+              >
+                <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
+              </Upload>
+            </Form.Item>
           </Col>
           <Col span={8}>
             {backgroundImage && (
-              <img
+              <Image
                 src={backgroundImage}
                 alt="Background"
                 style={{ width: "80px", height: "80px", objectFit: "cover" }}
@@ -414,21 +473,23 @@ const EventSetting = () => {
               Logo công ty (Kích thước khuyến nghị: 250px X 250px. Dung lượng{" "}
               {"≤"} 5Mb)
             </Typography.Text>
-            <Upload
-              showUploadList={false}
-              customRequest={({ file, onSuccess }) => {
-                if (file && onSuccess) {
-                  setTimeout(() => onSuccess("ok"), 1000);
-                  setLogoImage(URL.createObjectURL(file as Blob));
-                }
-              }}
-            >
-              <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
-            </Upload>
+            <Form.Item name="logo">
+              <Upload
+                showUploadList={false}
+                customRequest={({ file, onSuccess }) => {
+                  if (file && onSuccess) {
+                    setTimeout(() => onSuccess("ok"), 1000);
+                    setLogoImage(URL.createObjectURL(file as Blob));
+                  }
+                }}
+              >
+                <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
+              </Upload>
+            </Form.Item>
           </Col>
           <Col span={8}>
             {logoImage && (
-              <img
+              <Image
                 src={logoImage}
                 alt="Logo"
                 style={{ width: "80px", height: "80px", objectFit: "cover" }}
@@ -441,17 +502,27 @@ const EventSetting = () => {
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={12}>
             <Typography.Text>Màu nền</Typography.Text>
-            <ColorPicker showText value={colorBg} onChange={setColorBg}>
+            <ColorPicker
+              showText
+              value={colorBg}
+              onChange={(value) => setColorBg(value)}
+            >
               <Button style={btnStyle}>{bgColor.toUpperCase()}</Button>
             </ColorPicker>
           </Col>
           <Col span={12}>
             <Typography.Text>Màu chữ</Typography.Text>
-            <ColorPicker showText value={colorText} onChange={setColorText}>
-              <Button style={btnStyleColorText}>
-                {bgColorText.toUpperCase()}
-              </Button>
-            </ColorPicker>
+            <Form.Item name="colorText">
+              <ColorPicker
+                showText
+                value={colorText}
+                onChange={(value) => setColorText(value)}
+              >
+                <Button style={btnStyleColorText}>
+                  {bgColorText.toUpperCase()}
+                </Button>
+              </ColorPicker>
+            </Form.Item>
           </Col>
         </Row>
 
@@ -460,7 +531,7 @@ const EventSetting = () => {
             <Typography.Text>Màu nút bấm</Typography.Text>
             <ColorPicker showText value={colorButton} onChange={setColorButton}>
               <Button style={btnStyleColorButton}>
-                {bgColorButton.toUpperCase()}
+                {buttonColors.join(" & ").toUpperCase()}
               </Button>
             </ColorPicker>
           </Col>
@@ -468,7 +539,7 @@ const EventSetting = () => {
             <Typography.Text>Màu nền các số</Typography.Text>
             <ColorPicker showText value={colorDigit} onChange={setColorDigit}>
               <Button style={btnStyleColorDigit}>
-                {bgColorDigit.toUpperCase()}
+                {btnDigitColors.join(" & ").toUpperCase()}
               </Button>
             </ColorPicker>
           </Col>
@@ -490,7 +561,10 @@ const EventSetting = () => {
           <Button
             type="primary"
             style={{ backgroundColor: "rgb(21, 120, 21)" }}
-            onClick={handleOKShow}
+            onClick={() => {
+              handleUpdateEventSetting();
+              setIsModalOpenShow(false);
+            }}
           >
             Lưu
           </Button>
