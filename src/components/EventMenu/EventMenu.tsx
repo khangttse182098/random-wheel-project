@@ -9,15 +9,29 @@ import style from "./EventMenu.module.scss";
 const EventMenu = () => {
   const { chooseEvent, user } = useAppStore((state) => state);
   const navigate = useNavigate();
-
   useEffect(() => {
-    if (!chooseEvent && (user.password == "" || user.userName == "")) {
-      navigate("/home/event-manage", {
+    if (user.password == "" || user.userName == "") {
+      console.log("Navigate to /");
+      navigate("/", {
         replace: true,
+        state: { error: "Bạn cần đăng nhập!" },
       });
+      return;
     }
-    console.log(chooseEvent);
-  }, [chooseEvent, navigate, user]);
+
+    if (!chooseEvent) {
+      navigate("/event-manage", {
+        replace: true,
+        state: { error: "Bạn cần chọn sự kiện" },
+      });
+      return;
+    }
+  }, [user, navigate, chooseEvent]);
+
+  // Prevent rendering if the user is not logged in or no event is selected
+  if (user.password === "" || user.userName === "" || !chooseEvent) {
+    return null; // Stop rendering the component
+  }
 
   return (
     <div className={style["container"]}>

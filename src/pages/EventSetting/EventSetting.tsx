@@ -41,7 +41,6 @@ const EventSetting = () => {
   const [colorButton, setColorButton] = useState<Color>("#1677ff");
   const [colorDigit, setColorDigit] = useState<Color>("#1677ff");
   const [colorText, setColorText] = useState<Color>("#1677ff");
-  const { user } = useAppStore.getState();
 
   const bgColor = useMemo<string>(
     () => (typeof colorBg === "string" ? colorBg : colorBg!.toHexString()),
@@ -155,14 +154,12 @@ const EventSetting = () => {
   };
 
   const fetchEventSetting = useCallback(async () => {
-    if (user.password != "" && user.userName != "") {
-      try {
-        const res = await getConfigureEvent(eventID!);
-        const data = res.data.data;
-        setSettingEventData(data);
-      } catch (error) {
-        toast.error("Lỗi khi lấy cấu hình sự kiện");
-      }
+    try {
+      const res = await getConfigureEvent(eventID!);
+      const data = res.data.data;
+      setSettingEventData(data);
+    } catch (error) {
+      toast.error("Lỗi khi lấy cấu hình sự kiện");
     }
   }, []);
 

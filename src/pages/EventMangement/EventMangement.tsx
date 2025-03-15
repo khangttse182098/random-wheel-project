@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { FaPlus, FaRegCheckCircle, FaWrench } from "react-icons/fa";
 import { IoIosCloseCircleOutline } from "react-icons/io";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import {
@@ -27,6 +27,7 @@ const EventMangement = () => {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingRecord, setEditingRecord] = useState<EventData | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { addChooseEvent } = useAppStore((state) => state);
 
   const fetchEventList = useCallback(async () => {
@@ -38,6 +39,16 @@ const EventMangement = () => {
       toast.error("Lỗi khi lấy danh sách sự kiện");
     }
   }, []);
+
+  //load error if any
+  useEffect(() => {
+    if (location.state?.error) {
+      toast.error(location.state.error);
+
+      // Clear the error from location.state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  });
 
   useEffect(() => {
     fetchEventList();

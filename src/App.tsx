@@ -17,37 +17,37 @@ function App() {
       element: <SignIn />,
     },
     {
-      path: "/home",
+      path: "/",
       element: <HomeLayout />,
       children: [
         {
-          path: "event-manage",
+          path: "/event-manage",
           element: <EventMangement />,
         },
         {
-          path: "account-info",
+          path: "/account-info",
           element: <AccountInfo />,
         },
       ],
     },
     {
-      path: "/config",
+      path: "/",
       element: <EventConfigLayout />,
       children: [
         {
-          path: "event-setting",
+          path: "/event-setting",
           element: <EventSetting />,
         },
         {
-          path: "prize-manage",
+          path: "/prize-manage",
           element: <PrizeMangement />,
         },
         {
-          path: "contestant-list",
+          path: "/contestant-list",
           element: <ContestantList />,
         },
         {
-          path: "winner-list",
+          path: "/winner-list",
           element: <WinnerList />,
         },
       ],
