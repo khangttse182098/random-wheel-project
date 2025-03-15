@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import { UpdateEventSettingData } from "../../models/eventSetting";
 import { updateEventSetting } from "../../service/event/api";
+import { uploadImage } from "../../service/imageUpload/api"; // Import the uploadImage function
 import useAppStore from "../../store/useAppStore";
 import style from "./EventSetting.module.scss";
 
@@ -29,7 +30,6 @@ type Color = Extract<
 >;
 const EventSetting = () => {
   const { eventSetting } = useAppStore((state) => state);
-  const [form] = Form.useForm();
 
   // information for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,6 +43,8 @@ const EventSetting = () => {
 
   const showModalShow = () => {
     setIsModalOpenShow(true);
+    setBackgroundImage(eventSetting?.backgroundImage || null);
+    setLogoImage(eventSetting?.logo || null);
   };
 
   const handleCancel = () => {
@@ -53,15 +55,15 @@ const EventSetting = () => {
     setIsModalOpenShow(false);
   };
 
-  // const fetchEventSetting = useCallback(async () => {
-  //   try {
-  //     const res = await getConfigureEvent(eventID!);
-  //     const data = res.data.data;
-  //     setSettingEventData(data);
-  //   } catch (error) {
-  //     toast.error("Lỗi khi lấy cấu hình sự kiện");
-  //   }
-  // }, [eventID]);
+  const handleUpload = async (file: File, setImage: (url: string) => void) => {
+    try {
+      const result = await uploadImage(file);
+      setImage(result.secure_url);
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      toast.error("Image upload failed");
+    }
+  };
 
   const transformedData = eventSetting ? [eventSetting] : [];
 
@@ -171,8 +173,8 @@ const EventSetting = () => {
   const handleUpdateEventSetting = async () => {
     try {
       const payload: UpdateEventSettingData = {
-        logo: form.getFieldValue("logo"),
-        backgroundImage: form.getFieldValue("backgroundImage"),
+        logo: logoImage || eventSetting!.logo,
+        backgroundImage: backgroundImage || eventSetting!.backgroundImage,
         backgroundColor: bgColor,
         buttonColor: bgColorButton,
         numberBackgroundColor: bgColorDigit,
@@ -445,12 +447,9 @@ const EventSetting = () => {
             <Form.Item name="backgroundImage">
               <Upload
                 showUploadList={false}
-                customRequest={({ file, onSuccess }) => {
-                  if (file && onSuccess) {
-                    setTimeout(() => onSuccess("ok"), 1000);
-                    setBackgroundImage(URL.createObjectURL(file as Blob));
-                  }
-                }}
+                customRequest={({ file }) =>
+                  handleUpload(file as File, setBackgroundImage)
+                }
               >
                 <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
               </Upload>
@@ -476,12 +475,9 @@ const EventSetting = () => {
             <Form.Item name="logo">
               <Upload
                 showUploadList={false}
-                customRequest={({ file, onSuccess }) => {
-                  if (file && onSuccess) {
-                    setTimeout(() => onSuccess("ok"), 1000);
-                    setLogoImage(URL.createObjectURL(file as Blob));
-                  }
-                }}
+                customRequest={({ file }) =>
+                  handleUpload(file as File, setLogoImage)
+                }
               >
                 <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
               </Upload>
