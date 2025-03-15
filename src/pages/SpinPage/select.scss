@@ -1,0 +1,25 @@
+:root {
+  --selectBg: white;
+  --selectText: white;
+}
+.ant-select-selector {
+  border: none !important;
+  border-radius: 9px !important;
+  color: var(--selectText) !important;
+  background-color: var(--selectBg) !important;
+  background: var(--selectBg) !important;
+  .ant-select-selection-item {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+  }
+
+  &:hover {
+    filter: brightness(90%);
+  }
+}
+
+.ant-select-open {
+  .ant-select-selection-item {
+    color: var(--selectText) !important;
+  }
+}
