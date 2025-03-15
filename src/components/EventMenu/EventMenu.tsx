@@ -7,15 +7,17 @@ import useAppStore from "../../store/useAppStore";
 import style from "./EventMenu.module.scss";
 
 const EventMenu = () => {
-  const { chooseEvent } = useAppStore((state) => state);
+  const { chooseEvent, user } = useAppStore((state) => state);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!chooseEvent) {
-      navigate(-1);
+    if (!chooseEvent && (user.password == "" || user.userName == "")) {
+      navigate("/home/event-manage", {
+        replace: true,
+      });
     }
     console.log(chooseEvent);
-  }, [chooseEvent, navigate]);
+  }, [chooseEvent, navigate, user]);
 
   return (
     <div className={style["container"]}>
