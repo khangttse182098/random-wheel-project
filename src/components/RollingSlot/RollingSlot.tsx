@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import style from "../../pages/SpinPage/SpinPage.module.scss";
+import useAppStore from "../../store/useAppStore";
 
 interface RollingSlotProps {
   currentCode: string;
@@ -60,6 +61,8 @@ const RollingSlot: React.FC<RollingSlotProps> = ({
   previousCode,
 }) => {
   const slotRef = useRef<HTMLUListElement>(null);
+  const { eventSetting } = useAppStore.getState();
+
   useEffect(() => {
     const valuePosition = charList.indexOf(currentCode);
     const previousCodePosition = charList.indexOf(previousCode);
@@ -73,9 +76,9 @@ const RollingSlot: React.FC<RollingSlotProps> = ({
         slotRef.current,
         { y: start },
         {
-          y: end, // Trả về vị trí gốc
-          duration: 3, // animation khoảng 1.5s
-          ease: "power3.inOut", // Hiệu ứng chuyển động
+          y: end,
+          duration: 3,
+          ease: "power3.inOut",
           delay: delay,
         }
       );
@@ -83,7 +86,14 @@ const RollingSlot: React.FC<RollingSlotProps> = ({
   }, [currentCode, previousCode, delay]);
 
   return (
-    <div className={style["slot"]}>
+    <div
+      className={style["slot"]}
+      style={
+        {
+          "--slotBg": eventSetting?.numberBackgroundColor,
+        } as React.CSSProperties
+      }
+    >
       <ul ref={slotRef} className={style["slot-number"]}>
         {charList.map((char, index) => (
           <li key={index}>{char}</li>

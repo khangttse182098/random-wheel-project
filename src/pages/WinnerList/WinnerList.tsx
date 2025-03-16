@@ -1,12 +1,24 @@
-import { ImCross } from "react-icons/im";
-import { FaRegFileExcel } from "react-icons/fa";
-import { ColumnType } from "antd/es/table";
-import style from "./WinnerList.module.scss";
 import { Button } from "antd";
 import Search from "antd/es/input/Search";
+import { ColumnType } from "antd/es/table";
+import { FaRegFileExcel } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
+import { WinnerData } from "../../models/winner";
+import useAppStore from "../../store/useAppStore";
+import style from "./WinnerList.module.scss";
 
 const WinnerList = () => {
+  const { winnerList } = useAppStore.getState();
+  
+  // const handleDeleteWinner = async () => {
+  //   try {
+      
+  //   } catch (error) {
+  //     toast.error("Lỗi khi xóa danh sách trúng giải")
+  //   }
+  // }
+ 
   const columns: ColumnType[] = [
     {
       title: "STT",
@@ -16,31 +28,41 @@ const WinnerList = () => {
     },
     {
       title: "Ngày trúng thưởng",
-      dataIndex: "awards_date",
+      dataIndex: "awardDate",
     },
     {
       title: "Tên giải",
-      dataIndex: "name",
+      dataIndex: "rewardName",
     },
     {
       title: "Lần quay",
-      dataIndex: "rolling_order",
+      dataIndex: "rollingOrder",
     },
     {
       title: "Họ tên",
-      dataIndex: "full_name",
+      dataIndex: "participantName",
     },
     {
       title: "Phòng ban",
-      dataIndex: "departure",
+      dataIndex: "department",
     },
     {
       title: "Mã quay số",
-      dataIndex: "winner_number",
+      dataIndex: "code",
     },
     {
       title: "Chức năng",
       dataIndex: "",
+      render: () => (
+        <Button
+          icon={<ImCross />}
+          className={style["setting__opt"]}
+          color="danger"
+          variant="solid"
+        >
+          Hủy kết quả
+        </Button>
+      ),
     },
   ];
   return (
@@ -69,7 +91,10 @@ const WinnerList = () => {
         <Search className={style["search__input"]} />
       </div>
       {/* table */}
-      <AntDCustomTable columns={columns} dataSource={[]} />
+      <AntDCustomTable
+        columns={columns}
+        dataSource={winnerList as WinnerData[]}
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { Button, Input, Modal, Popconfirm } from "antd";
 import Search from "antd/es/input/Search";
 import { ColumnType } from "antd/es/table";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { CiCircleAlert } from "react-icons/ci";
 import { FaRegCheckCircle, FaRegFileExcel, FaRegSave } from "react-icons/fa";
@@ -19,7 +19,6 @@ import {
 import {
   createParticipant,
   deleteParticipant,
-  getParticipantList,
   updateParticipant,
 } from "../../service/participant/api";
 import useAppStore from "../../store/useAppStore";
@@ -29,10 +28,12 @@ import style from "./ContestantList.module.scss";
 
 const ContestantList = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [participantData, setParticipantData] = useState<Participant[]>([]);
+  // const [participantData, setParticipantData] = useState<Participant[]>([]);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingRecord, setEditingRecord] = useState<Participant | null>(null);
-  const { chooseEvent } = useAppStore((state) => state);
+  const { chooseEvent, participantList, setParticipantList } = useAppStore(
+    (state) => state
+  );
   const eventID = chooseEvent?.id;
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -49,7 +50,7 @@ const ContestantList = () => {
       department: String(row.getCell(3).value || ""),
     }));
 
-    setParticipantData(importedData);
+    setParticipantList(importedData);
   };
 
   const handleExportTemplate = () => {
@@ -71,27 +72,30 @@ const ContestantList = () => {
     );
   };
 
-  const fetchParticipantList = useCallback(async () => {
-    try {
-      const res = await getParticipantList(eventID!);
-      const data = res.data.data;
-      setParticipantData(data);
-    } catch (error) {
-      toast.error("Lỗi khi lấy danh sách người tham gia");
+  // handle search
+  const handleSearchValue = (value: string) => {
+    if (value.trim() === '') {
+      // Reset to the original participant list when the search value is empty
+      setParticipantList(useAppStore.getState().participantList || []);
+      return;
     }
-  }, []);
-
-  useEffect(() => {
-    fetchParticipantList();
-  }, []);
+    
+    const filteredParticipants = participantList?.filter((participant) => {
+      return participant.fullName.includes(value) 
+        || participant.code.includes(value) 
+        || participant.department.includes(value);
+    }) || [];
+  
+    setParticipantList(filteredParticipants);
+  }
 
   const handleSaveParticipantList = useCallback(async () => {
-    if (participantData.length === 0) {
+    if (participantList!.length === 0) {
       toast.info("Không có dữ liệu để lưu");
       return;
     }
     try {
-      const savedData: CreateParticipantData[] = participantData.map(
+      const savedData: CreateParticipantData[] = participantList!.map(
         (item) => ({
           code: item.code,
           fullName: item.fullName,
@@ -105,29 +109,32 @@ const ContestantList = () => {
     } catch (error) {
       toast.error("Lỗi khi lưu danh sách người tham dự");
     }
-  }, [participantData]);
+  }, [participantList, eventID]);
 
   const handleDeleteParticipant = async (id: string) => {
     try {
       await deleteParticipant([id]);
       toast.success("Xóa người tham dự thành công");
-      fetchParticipantList();
-    } catch (error) {
-      toast.error("Lỗi khi xóa người tham dự");
+      const newParticipantList = participantList!.filter(
+        (item) => item.id != id
+      );
+      setParticipantList(newParticipantList);
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
     }
   };
 
   const handleDeleteAllParticipant = async () => {
     try {
-      const idsToDelete = participantData
+      const idsToDelete = participantList!
         .map((item) => item.id)
         .filter((id): id is string => id !== undefined);
       await deleteParticipant(idsToDelete);
       toast.success("Xóa người tham dự thành công");
-      fetchParticipantList();
+      setParticipantList([]);
       setShowModal(false);
-    } catch (error) {
-      toast.error("Lỗi khi xóa người tham dự");
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
     }
   };
 
@@ -144,7 +151,7 @@ const ContestantList = () => {
           return;
         }
 
-        const originalRecord = participantData.find((item) => item.id === id);
+        const originalRecord = participantList!.find((item) => item.id === id);
         if (!originalRecord) return;
 
         // Chỉ lấy 3 trường cần cập nhật
@@ -176,12 +183,18 @@ const ContestantList = () => {
         toast.success("Cập nhật người tham dự thành công");
         setEditingKey(null);
         setEditingRecord(null);
-        fetchParticipantList();
+
+        //update participantList locally
+        const newParticipantList = participantList!.map((item) => {
+          if (item.id == id) return { ...item, ...payload };
+          return item;
+        });
+        setParticipantList(newParticipantList);
       } catch (error) {
         toast.error("Lỗi khi cập nhật dữ liệu");
       }
     },
-    [editingRecord, fetchParticipantList]
+    [editingRecord, eventID, participantList, setParticipantList]
   );
 
   const handleCancelEdit = () => {
@@ -338,10 +351,10 @@ const ContestantList = () => {
           </Button>
         </div>
         {/* search */}
-        <Search className={style["search__input"]} />
+        <Search className={style["search__input"]} onChange={(e) => handleSearchValue(e.target.value)}/>
       </div>
       {/* table */}
-      <AntDCustomTable columns={columns} dataSource={participantData} />
+      <AntDCustomTable columns={columns} dataSource={participantList!} />
       <Modal
         onCancel={() => {
           setShowModal(false);

@@ -1,25 +1,26 @@
-import type { CheckboxProps, ColorPickerProps, GetProp } from "antd";
+import type { ColorPickerProps, GetProp } from "antd";
 import {
   Button,
   Checkbox,
   Col,
   ColorPicker,
   Divider,
+  Form,
   Image,
   Modal,
   Row,
-  Select,
-  Tooltip,
   Typography,
   Upload,
 } from "antd";
 import { ColumnType } from "antd/es/table";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaCheck, FaWrench } from "react-icons/fa";
+import { useMemo, useState } from "react";
+import { FaCheck, FaWrench } from "react-icons/fa6";
 import { ImCross } from "react-icons/im";
 import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
-import { getConfigureEvent } from "../../service/event/api";
+import { UpdateEventSettingData } from "../../models/eventSetting";
+import { updateEventSetting } from "../../service/event/api";
+import { uploadImage } from "../../service/imageUpload/api"; // Import the uploadImage function
 import useAppStore from "../../store/useAppStore";
 import style from "./EventSetting.module.scss";
 
@@ -28,34 +29,73 @@ type Color = Extract<
   string | { cleared: any }
 >;
 const EventSetting = () => {
-  // information for checkbox
-  const onChange: CheckboxProps["onChange"] = (e) => {
-    console.log(`checked = ${e.target.checked}`);
-  };
-  const [settingEventData, setSettingEventData] = useState(null);
-  const { chooseEvent } = useAppStore((state) => state);
-  const eventID = chooseEvent?.id;
-  const [slotCount, setSlotCount] = useState(7);
-  const [drawType, setDrawType] = useState("both");
-  const [colorBg, setColorBg] = useState<Color>("#1677ff");
-  const [colorButton, setColorButton] = useState<Color>("#1677ff");
-  const [colorDigit, setColorDigit] = useState<Color>("#1677ff");
-  const [colorText, setColorText] = useState<Color>("#1677ff");
+  const { eventSetting } = useAppStore((state) => state);
 
+  // information for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenShow, setIsModalOpenShow] = useState(false);
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const showModalShow = () => {
+    setIsModalOpenShow(true);
+    setBackgroundImage(eventSetting?.backgroundImage || null);
+    setLogoImage(eventSetting?.logo || null);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancelShow = () => {
+    setIsModalOpenShow(false);
+  };
+
+  const handleUpload = async (file: File, setImage: (url: string) => void) => {
+    try {
+      const result = await uploadImage(file);
+      setImage(result.secure_url);
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      toast.error("Image upload failed");
+    }
+  };
+
+  const transformedData = eventSetting ? [eventSetting] : [];
+
+  // -------------------------------------- Phần Cài đặt trình bày ---------------------------------------
+  const [colorBg, setColorBg] = useState<Color>(eventSetting!.backgroundColor);
+  const [colorButton, setColorButton] = useState<Color>(
+    eventSetting!.buttonColor
+  );
+  const [colorDigit, setColorDigit] = useState<Color>(
+    eventSetting!.numberBackgroundColor
+  );
+  const [colorText, setColorText] = useState<Color>(eventSetting!.textColor);
+  const extractColorsFromGradient = (gradient: string): string[] => {
+    const regex = /#([0-9a-f]{3,6})/gi;
+    return gradient.match(regex) || [];
+  };
+
+  // Màu nền
   const bgColor = useMemo<string>(
-    () => (typeof colorBg === "string" ? colorBg : colorBg!.toHexString()),
+    () => (typeof colorBg === "string" ? colorBg : colorBg.toHexString()),
     [colorBg]
   );
-
   const btnStyle: React.CSSProperties = {
     backgroundColor: bgColor,
-    color: "white",
-    border: "none",
+    color: "black",
+    border: "variant",
     width: "100%",
     height: "40px",
     marginTop: "2px",
   };
 
+  // Màu nút bấm
   const bgColorButton = useMemo<string>(
     () =>
       typeof colorButton === "string"
@@ -63,111 +103,92 @@ const EventSetting = () => {
         : colorButton!.toHexString(),
     [colorButton]
   );
+  const btnStyleColorButton: React.CSSProperties = useMemo(() => {
+    const isGradient = bgColorButton.startsWith("linear-gradient");
+    return {
+      backgroundImage: isGradient ? bgColorButton : undefined,
+      backgroundColor: isGradient ? undefined : bgColorButton,
+      color: "white",
+      border: "variant",
+      width: "100%",
+      height: "40px",
+      marginTop: "2px",
+    };
+  }, [bgColorButton]);
+  const buttonColors = useMemo<string[]>(
+    () => extractColorsFromGradient(bgColorButton),
+    [bgColorButton]
+  );
 
-  const btnStyleColorButton: React.CSSProperties = {
-    backgroundColor: bgColorButton,
-    color: "white",
-    border: "none",
-    width: "100%",
-    height: "40px",
-    marginTop: "2px",
-  };
-
+  // Màu nền các số
   const bgColorDigit = useMemo<string>(
     () =>
       typeof colorDigit === "string" ? colorDigit : colorDigit!.toHexString(),
     [colorDigit]
   );
+  const btnStyleColorDigit: React.CSSProperties = useMemo(() => {
+    const isGradient = bgColorDigit.startsWith("linear-gradient");
+    return {
+      backgroundImage: isGradient ? bgColorDigit : undefined,
+      backgroundColor: isGradient ? undefined : bgColorDigit,
+      color: "white",
+      border: "variant",
+      width: "100%",
+      height: "40px",
+      marginTop: "2px",
+    };
+  }, [bgColorDigit]);
+  const btnDigitColors = useMemo<string[]>(
+    () => extractColorsFromGradient(bgColorDigit),
+    [bgColorDigit]
+  );
 
-  const btnStyleColorDigit: React.CSSProperties = {
-    backgroundColor: bgColorDigit,
-    color: "white",
-    border: "none",
-    width: "100%",
-    height: "40px",
-    marginTop: "2px",
-  };
-
+  // Màu chữ
   const bgColorText = useMemo<string>(
     () =>
       typeof colorText === "string" ? colorText : colorText!.toHexString(),
     [colorText]
   );
-
   const btnStyleColorText: React.CSSProperties = {
     backgroundColor: bgColorText,
-    color: "white",
-    border: "none",
+    color: "black",
+    border: "variant",
     width: "100%",
     height: "40px",
     marginTop: "2px",
   };
+  // ----------------------------------------------------------------------------------------------------
 
-  // information for modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalOpenAdvanced, setIsModalOpenAdvanced] = useState(false);
-  const [isModalOpenShow, setIsModalOpenShow] = useState(false);
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
-  const [logoImage, setLogoImage] = useState<string | null>(null);
+  // -------------------------------------- Phần Cài đặt hiển thị ---------------------------------------
+  const [showBackground, setShowBackground] = useState<boolean>(
+    eventSetting!.showBackground
+  );
+  const [showLogo, setShowLogo] = useState<boolean>(eventSetting!.showLogo);
+  const [showEventName, setShowEventName] = useState<boolean>(
+    eventSetting!.showEventName
+  );
+  // ----------------------------------------------------------------------------------------------------
 
-  // Handle file upload
-  // const handleUpload = (info: any, setImage: any) => {
-  //   if (info.file.status === "done") {
-  //     setImage(URL.createObjectURL(info.file.originFileObj));
-  //   }
-  // };
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const showModalAdvanced = () => {
-    setIsModalOpenAdvanced(true);
-  };
-
-  const showModalShow = () => {
-    setIsModalOpenShow(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleOKAdvanced = () => {
-    setIsModalOpenAdvanced(false);
-  };
-
-  const handleOKShow = () => {
-    setIsModalOpenShow(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancelAdvanced = () => {
-    setIsModalOpenAdvanced(false);
-  };
-
-  const handleCancelShow = () => {
-    setIsModalOpenShow(false);
-  };
-
-  const fetchEventSetting = useCallback(async () => {
+  // ----------------------------------------- Phần update ----------------------------------------------
+  const handleUpdateEventSetting = async () => {
     try {
-      const res = await getConfigureEvent(eventID!);
-      const data = res.data.data;
-      setSettingEventData(data);
+      const payload: UpdateEventSettingData = {
+        logo: logoImage || eventSetting!.logo,
+        backgroundImage: backgroundImage || eventSetting!.backgroundImage,
+        backgroundColor: bgColor,
+        buttonColor: bgColorButton,
+        numberBackgroundColor: bgColorDigit,
+        textColor: bgColorText,
+        showBackground,
+        showLogo,
+        showEventName,
+      };
+      await updateEventSetting(eventSetting!.id, payload);
+      toast.success("Cập nhật cấu hình sự kiện thành công");
     } catch (error) {
-      toast.error("Lỗi khi lấy cấu hình sự kiện");
+      toast.error("Lỗi khi cấu hình sự kiện");
     }
-  }, []);
-
-  const transformedData = settingEventData ? [settingEventData] : [];
-
-  useEffect(() => {
-    fetchEventSetting();
-  }, []);
+  };
 
   const firstColumn: ColumnType[] = [
     {
@@ -181,24 +202,25 @@ const EventSetting = () => {
       render: (_, record) => <Image width={100} src={record.backgroundImage} />,
     },
     // Trường này ko ảnh hưởng gì (cân nhắc xóa)
-    // {
-    //   title: "Màu nền",
-    //   dataIndex: "backgroundColor",
-    //   render: (_, record) => (
-    //     <div
-    //       style={{
-    //         backgroundColor: record.backgroundColor,
-    //       }}
-    //       className={style["color__opt"]}
-    //     ></div>
-    //   ),
-    // },
+    {
+      title: "Màu nền",
+      dataIndex: "backgroundColor",
+      render: (_, record) => (
+        <div
+          style={{
+            backgroundColor: record.backgroundColor,
+          }}
+          className={style["color__opt"]}
+        ></div>
+      ),
+    },
     {
       title: "Màu nút bấm",
       dataIndex: "buttonColor",
       render: (_, record) => (
         <div
           style={{
+            backgroundImage: record.buttonColor,
             backgroundColor: record.buttonColor,
           }}
           className={style["color__opt"]}
@@ -211,6 +233,7 @@ const EventSetting = () => {
       render: (_, record) => (
         <div
           style={{
+            backgroundImage: record.numberBackgroundColor,
             backgroundColor: record.numberBackgroundColor,
           }}
           className={style["color__opt"]}
@@ -313,26 +336,6 @@ const EventSetting = () => {
       title: "Loại quay số",
       dataIndex: "spinCategory",
     },
-    {
-      // Mặc định quay từng chữ số, không cho thay đổi
-      title: "Kiểu quay số",
-      dataIndex: "spinType",
-    },
-    {
-      title: "",
-      dataIndex: "setting",
-      render: () => (
-        <Button
-          icon={<FaWrench />}
-          className={style["setting__opt"]}
-          color="danger"
-          variant="solid"
-          onClick={showModalAdvanced}
-        >
-          Cài đặt
-        </Button>
-      ),
-    },
   ];
 
   return (
@@ -358,7 +361,7 @@ const EventSetting = () => {
         />
       </div>
       <div className={style["wrapper"]}>
-        <p className={style["title"]}>Cài đặt kiểu quay số</p>
+        <p className={style["title"]}>Kiểu quay số</p>
         <Divider className={style["divider"]} />
         <AntDCustomTable
           columns={thirdColumn}
@@ -371,19 +374,30 @@ const EventSetting = () => {
       <Modal
         title="CÀI ĐẶT HIỂN THỊ"
         open={isModalOpen}
-        onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
       >
         <hr></hr>
         <div className={style["display__setting"]}>
-          <Checkbox style={{ fontSize: "20px" }} onChange={onChange}>
+          <Checkbox
+            style={{ fontSize: "20px" }}
+            defaultChecked={showBackground}
+            onChange={(e) => setShowBackground(e.target.checked)}
+          >
             Hiển thị hình nền
           </Checkbox>
-          <Checkbox style={{ fontSize: "20px" }} onChange={onChange}>
+          <Checkbox
+            style={{ fontSize: "20px" }}
+            defaultChecked={showLogo}
+            onChange={(e) => setShowLogo(e.target.checked)}
+          >
             Hiển thị logo công ty
           </Checkbox>
-          <Checkbox style={{ fontSize: "20px" }} onChange={onChange}>
+          <Checkbox
+            style={{ fontSize: "20px" }}
+            defaultChecked={showEventName}
+            onChange={(e) => setShowEventName(e.target.checked)}
+          >
             Hiển thị tên sự kiên
           </Checkbox>
         </div>
@@ -397,7 +411,10 @@ const EventSetting = () => {
           </Button>
           <Button
             type="primary"
-            onClick={handleOk}
+            onClick={() => {
+              handleUpdateEventSetting();
+              setIsModalOpen(false);
+            }}
             style={{
               backgroundColor: "rgb(21, 120, 21)",
               borderColor: "#28a745",
@@ -407,69 +424,10 @@ const EventSetting = () => {
           </Button>
         </div>
       </Modal>
-      {/* type roll number modal */}
-      <Modal
-        title="CÀI ĐẶT NÂNG CAO"
-        open={isModalOpenAdvanced}
-        onOk={handleOKAdvanced}
-        onCancel={handleCancelAdvanced}
-        footer={null}
-      >
-        <hr></hr>
-        <div className={style["advanced__setting"]}>
-          <div style={{ marginBottom: 16 }}>
-            <Typography.Text strong>
-              SỐ LƯỢNG Ô: <Tooltip title="Số lượng ô quay số"></Tooltip>
-            </Typography.Text>
-            <Select
-              value={slotCount}
-              onChange={setSlotCount}
-              style={{ width: "100%", marginTop: 4 }}
-              options={Array.from({ length: 10 }, (_, i) => ({
-                value: i + 1,
-                label: i + 1,
-              }))}
-            />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <Typography.Text strong>LOẠI QUAY SỐ:</Typography.Text>
-            <Select
-              value={drawType}
-              onChange={setDrawType}
-              style={{ width: "100%", marginTop: 4 }}
-              options={[
-                { value: "numbers", label: "Chỉ quay số" },
-                { value: "letters", label: "Chỉ quay chữ" },
-                { value: "both", label: "Quay bao gồm cả số và chữ" },
-              ]}
-            />
-          </div>
-        </div>
-        <div className={style["advanced__setting__button"]}>
-          <Button
-            type="primary"
-            style={{ backgroundColor: "#c82333" }}
-            onClick={handleCancelAdvanced}
-          >
-            Đóng
-          </Button>
-          <Button
-            type="primary"
-            onClick={handleOKAdvanced}
-            style={{
-              backgroundColor: "rgb(21, 120, 21)",
-              borderColor: "#28a745",
-            }}
-          >
-            Lưu
-          </Button>
-        </div>
-      </Modal>
 
       {/* modal for CÀI ĐẶT TRÌNH BÀY */}
       <Modal
         open={isModalOpenShow}
-        onOk={handleOKShow}
         onCancel={handleCancelShow}
         footer={null}
         centered
@@ -486,21 +444,20 @@ const EventSetting = () => {
               Ảnh nền (Kích thước khuyến nghị: 1920px X 1080px. Dung lượng {"≤"}{" "}
               5Mb)
             </Typography.Text>
-            <Upload
-              showUploadList={false}
-              customRequest={({ file, onSuccess }) => {
-                if (file && onSuccess) {
-                  setTimeout(() => onSuccess("ok"), 1000);
-                  setBackgroundImage(URL.createObjectURL(file as Blob));
+            <Form.Item name="backgroundImage">
+              <Upload
+                showUploadList={false}
+                customRequest={({ file }) =>
+                  handleUpload(file as File, setBackgroundImage)
                 }
-              }}
-            >
-              <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
-            </Upload>
+              >
+                <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
+              </Upload>
+            </Form.Item>
           </Col>
           <Col span={8}>
             {backgroundImage && (
-              <img
+              <Image
                 src={backgroundImage}
                 alt="Background"
                 style={{ width: "80px", height: "80px", objectFit: "cover" }}
@@ -515,21 +472,20 @@ const EventSetting = () => {
               Logo công ty (Kích thước khuyến nghị: 250px X 250px. Dung lượng{" "}
               {"≤"} 5Mb)
             </Typography.Text>
-            <Upload
-              showUploadList={false}
-              customRequest={({ file, onSuccess }) => {
-                if (file && onSuccess) {
-                  setTimeout(() => onSuccess("ok"), 1000);
-                  setLogoImage(URL.createObjectURL(file as Blob));
+            <Form.Item name="logo">
+              <Upload
+                showUploadList={false}
+                customRequest={({ file }) =>
+                  handleUpload(file as File, setLogoImage)
                 }
-              }}
-            >
-              <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
-            </Upload>
+              >
+                <Button style={{ marginLeft: "10px" }}>Chọn ảnh</Button>
+              </Upload>
+            </Form.Item>
           </Col>
           <Col span={8}>
             {logoImage && (
-              <img
+              <Image
                 src={logoImage}
                 alt="Logo"
                 style={{ width: "80px", height: "80px", objectFit: "cover" }}
@@ -542,17 +498,27 @@ const EventSetting = () => {
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={12}>
             <Typography.Text>Màu nền</Typography.Text>
-            <ColorPicker showText value={colorBg} onChange={setColorBg}>
+            <ColorPicker
+              showText
+              value={colorBg}
+              onChange={(value) => setColorBg(value)}
+            >
               <Button style={btnStyle}>{bgColor.toUpperCase()}</Button>
             </ColorPicker>
           </Col>
           <Col span={12}>
             <Typography.Text>Màu chữ</Typography.Text>
-            <ColorPicker showText value={colorText} onChange={setColorText}>
-              <Button style={btnStyleColorText}>
-                {bgColorText.toUpperCase()}
-              </Button>
-            </ColorPicker>
+            <Form.Item name="colorText">
+              <ColorPicker
+                showText
+                value={colorText}
+                onChange={(value) => setColorText(value)}
+              >
+                <Button style={btnStyleColorText}>
+                  {bgColorText.toUpperCase()}
+                </Button>
+              </ColorPicker>
+            </Form.Item>
           </Col>
         </Row>
 
@@ -561,7 +527,7 @@ const EventSetting = () => {
             <Typography.Text>Màu nút bấm</Typography.Text>
             <ColorPicker showText value={colorButton} onChange={setColorButton}>
               <Button style={btnStyleColorButton}>
-                {bgColorButton.toUpperCase()}
+                {buttonColors.join(" & ").toUpperCase()}
               </Button>
             </ColorPicker>
           </Col>
@@ -569,7 +535,7 @@ const EventSetting = () => {
             <Typography.Text>Màu nền các số</Typography.Text>
             <ColorPicker showText value={colorDigit} onChange={setColorDigit}>
               <Button style={btnStyleColorDigit}>
-                {bgColorDigit.toUpperCase()}
+                {btnDigitColors.join(" & ").toUpperCase()}
               </Button>
             </ColorPicker>
           </Col>
@@ -591,7 +557,10 @@ const EventSetting = () => {
           <Button
             type="primary"
             style={{ backgroundColor: "rgb(21, 120, 21)" }}
-            onClick={handleOKShow}
+            onClick={() => {
+              handleUpdateEventSetting();
+              setIsModalOpenShow(false);
+            }}
           >
             Lưu
           </Button>

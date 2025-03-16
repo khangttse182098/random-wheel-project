@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { FaPlus, FaRegCheckCircle, FaWrench } from "react-icons/fa";
 import { IoIosCloseCircleOutline } from "react-icons/io";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import {
@@ -14,11 +14,19 @@ import {
   EventData,
   UpdateEventData,
 } from "../../models/event";
-import { addEvent, getEventList, updateEvent } from "../../service/event/api";
+import {
+  addEvent,
+  getConfigureEvent,
+  getEventList,
+  getRewardList,
+  getWinnerList,
+  updateEvent,
+} from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
 import { formatDate } from "../../utils/dateUtils";
 import style from "./EventMangement.module.scss";
 import { useForm } from "antd/es/form/Form";
+import { getParticipantList } from "../../service/participant/api";
 
 const EventMangement = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -27,8 +35,17 @@ const EventMangement = () => {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingRecord, setEditingRecord] = useState<EventData | null>(null);
   const navigate = useNavigate();
-  const { addChooseEvent } = useAppStore((state) => state);
+  const location = useLocation();
+  const {
+    addChooseEvent,
+    setParticipantList,
+    setEventSetting,
+    setRewardList,
+    setWinnerList,
+    resetAllEventData,
+  } = useAppStore((state) => state);
 
+  //get event list
   const fetchEventList = useCallback(async () => {
     try {
       const res = await getEventList();
@@ -39,6 +56,71 @@ const EventMangement = () => {
     }
   }, []);
 
+  //get contestant list
+  const fetchParticipantList = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getParticipantList(eventID!);
+        const data = res.data.data;
+        setParticipantList(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy danh sách người tham gia");
+      }
+    },
+    [setParticipantList]
+  );
+
+  //get reward list
+  const fetchRewardList = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getRewardList(eventID);
+        const data = res.data.data;
+        setRewardList(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy danh sách giải quay");
+      }
+    },
+    [setRewardList]
+  );
+
+  //get winner list
+  const fetchWinnerList = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getWinnerList(eventID!);
+        const data = res.data.data;
+        setWinnerList(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy cấu hình sự kiện");
+      }
+    },
+    [setWinnerList]
+  );
+
+  //get event setting
+  const fetchEventSetting = useCallback(
+    async (eventID: string) => {
+      try {
+        const res = await getConfigureEvent(eventID!);
+        const data = res.data.data;
+        setEventSetting(data);
+      } catch (error) {
+        toast.error("Lỗi khi lấy cấu hình sự kiện");
+      }
+    },
+    [setEventSetting]
+  );
+
+  //load error if any
+  useEffect(() => {
+    if (location.state?.error) {
+      toast.error(location.state.error);
+
+      // Clear the error from location.state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location]);
   useEffect(() => {
     fetchEventList();
   }, []);
@@ -261,12 +343,17 @@ const EventMangement = () => {
               color="danger"
               variant="solid"
               onClick={() => {
+                resetAllEventData();
                 addChooseEvent({
                   id: eventData.id,
                   name: eventData.name,
                   created_at: eventData.createdAt,
                   expiry_date: eventData.expiryDate,
                 });
+                fetchParticipantList(eventData.id);
+                fetchEventSetting(eventData.id);
+                fetchRewardList(eventData.id);
+                fetchWinnerList(eventData.id);
                 navigate("/event-setting");
               }}
             >

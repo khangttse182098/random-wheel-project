@@ -18,5 +18,12 @@ export const createParticipant = (data: CreateParticipantData[]) => {
 };
 
 export const deleteParticipant = (ids: string[]) => {
-  return api.delete("/api/v1/participants", { data: ids });
+  return api.delete("/api/v1/participants/delete", { data: ids });
+};
+
+// Hủy danh sách trúng giải
+export const deleteWinnerList = (ids: string[]) => {
+  return api.delete("/api/v1/reward-winner/event/delete-winner-list", {
+    data: ids,
+  });
 };
