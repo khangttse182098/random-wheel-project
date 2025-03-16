@@ -47,6 +47,11 @@ export const createAward = (data: CreateRewardData) => {
   return api.post("/api/v1/rewards", data);
 };
 
+// Xóa giải thưởng
+export const deleteAward = (ids: string[]) => {
+  return api.delete(`/api/v1/rewards/delete`, { data: ids });
+};
+
 //Lấy số lượt quay dựa trên giải
 export const getRollingNumber = (rewardId: number) => {
   return api.get(`/api/v1/rewards/${rewardId}`);
