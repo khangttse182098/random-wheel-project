@@ -15,34 +15,37 @@ import { useState } from "react";
 const WinnerList = () => {
   const { winnerList, setWinnerList } = useAppStore.getState();
   const [showModal, setShowModal] = useState<boolean>(false);
-  
+
   const handleDeleteAttendanceReward = async (id: string) => {
-      try {
-        await deleteWinnerList([id]);
-        toast.success("Xóa người trúng giải thành công");
-        const newWinnerList = winnerList!.filter(
-          (item) => item.attendanceRewardId != parseInt(id)
+    try {
+      await deleteWinnerList([id]);
+      toast.success("Xóa người trúng giải thành công");
+      const newWinnerList = winnerList!.filter(
+        (item) => item.attendanceRewardId != parseInt(id)
+      );
+      setWinnerList(newWinnerList);
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
+    }
+  };
+
+  const handleDeleteAllAttendanceRewards = async () => {
+    try {
+      const idsToDelete = winnerList!
+        .map((item) => item.attendanceRewardId.toString())
+        .filter(
+          (attendanceRewardId): attendanceRewardId is string =>
+            attendanceRewardId !== undefined
         );
-        setWinnerList(newWinnerList);
-      } catch (error: any) {
-        toast.error(error?.response?.data.message);
-      }
-    };
-  
-    const handleDeleteAllAttendanceRewards = async () => {
-      try {
-        const idsToDelete = winnerList!
-          .map((item) => item.attendanceRewardId.toString())
-          .filter((attendanceRewardId): attendanceRewardId is string => attendanceRewardId !== undefined);
-        await deleteWinnerList(idsToDelete);
-        toast.success("Xóa danh sách người trúng giải thành công");
-        setWinnerList([]);
-      //  setShowModal(false);
-      } catch (error: any) {
-        toast.error(error?.response?.data.message);
-      }
-    };
- 
+      await deleteWinnerList(idsToDelete);
+      toast.success("Xóa danh sách người trúng giải thành công");
+      setWinnerList([]);
+      setShowModal(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
+    }
+  };
+
   const columns: ColumnType[] = [
     {
       title: "STT",
@@ -82,12 +85,14 @@ const WinnerList = () => {
           color="danger"
           title="Xóa người trúng giải"
           description="Bạn có chắc muốn xóa người trúng giải này không?"
-          onConfirm={() => handleDeleteAttendanceReward(record.attendanceRewardId!.toString())}
+          onConfirm={() =>
+            handleDeleteAttendanceReward(record.attendanceRewardId!.toString())
+          }
           okText="Có"
           cancelText="Không"
         >
-           <Button type="primary" danger style={{ fontWeight: "bold" }}>
-           <ImCross /> Hủy kết quả
+          <Button type="primary" danger style={{ fontWeight: "bold" }}>
+            <ImCross /> Hủy kết quả
           </Button>
         </Popconfirm>
       ),
@@ -141,7 +146,10 @@ const WinnerList = () => {
             >
               Hủy
             </Button>
-            <Button type="primary" onClick={() => handleDeleteAllAttendanceRewards()}>
+            <Button
+              type="primary"
+              onClick={() => handleDeleteAllAttendanceRewards()}
+            >
               Ok
             </Button>
           </div>,

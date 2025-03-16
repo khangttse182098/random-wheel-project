@@ -9,3 +9,9 @@ export interface WinnerData {
   code: string;
   attendanceRewardId: number;
 }
+
+export interface SaveWinnerData {
+  rewardId: number;
+  winnersId: number[];
+  rollingOrder: number;
+}
