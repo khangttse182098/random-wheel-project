@@ -1,16 +1,20 @@
 import { Button, Form, Input, Modal, Popconfirm } from "antd";
-import { ImCross } from "react-icons/im";
-import style from "./PrizeMangement.module.scss";
-import { FaPlus } from "react-icons/fa";
 import Search from "antd/es/input/Search";
-import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import { ColumnType } from "antd/es/table";
-import useAppStore from "../../store/useAppStore";
-import { CreateRewardData, RewardData } from "../../models/reward";
-import { toast } from "react-toastify";
 import { useCallback, useState } from "react";
-import { createAward, deleteAward } from "../../service/event/api";
 import { CiCircleAlert } from "react-icons/ci";
+import { FaPlus } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
+import { toast } from "react-toastify";
+import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
+import { CreateRewardData, RewardData } from "../../models/reward";
+import {
+  createAward,
+  deleteAward,
+  getRewardList,
+} from "../../service/event/api";
+import useAppStore from "../../store/useAppStore";
+import style from "./PrizeMangement.module.scss";
 
 const PrizeMangement = () => {
   const [form] = Form.useForm();
@@ -19,7 +23,6 @@ const PrizeMangement = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
 
-  
   const handleCreatePrize = useCallback(async () => {
     try {
       const name = form.getFieldValue("name");
@@ -27,12 +30,14 @@ const PrizeMangement = () => {
       const winnerNumber = form.getFieldValue("winnerNumber");
       const payload: CreateRewardData = {
         eventId: chooseEvent!.id,
-        name,
+        rewardName: name,
         rollingNumber,
         winnerNumber,
         createdAt: new Date().toISOString(),
       };
       await createAward(payload);
+      const updatedRewardList = await getRewardList(chooseEvent!.id);
+      setRewardList(updatedRewardList.data.data);
       setShowModal(false);
       toast.success("Tạo giải thưởng thành công");
     } catch (error: any) {
@@ -42,52 +47,54 @@ const PrizeMangement = () => {
 
   // handle search
   const handleSearchValue = (value: string) => {
-    if (value.trim() === '') {
+    if (value.trim() === "") {
       // Reset to the original reward list when the search value is empty
       setRewardList(useAppStore.getState().rewardList || []);
       return;
     }
-  
-    const filteredRewards = rewardList?.filter((reward) => {
-      return reward.rewardName.includes(value) 
-        || reward.status.includes(value) 
-        || reward.rollingNumber === parseInt(value) 
-        || reward.winnerNumber === parseInt(value);
-    }) || [];
-  
+
+    const filteredRewards =
+      rewardList?.filter((reward) => {
+        return (
+          reward.rewardName.includes(value) ||
+          reward.status.includes(value) ||
+          reward.rollingNumber === parseInt(value) ||
+          reward.winnerNumber === parseInt(value)
+        );
+      }) || [];
+
     setRewardList(filteredRewards);
-      
-  }
+  };
 
   // handle one and many
   const handleDeleteReward = async (id: string) => {
-        try {
-          await deleteAward([id]);
-          toast.success("Xóa giải thưởng thành công");
-          const newRewardList = rewardList!.filter(
-            (item) => item.id != parseInt(id)
-          );
-          setRewardList(newRewardList);
-        } catch (error: any) {
-          toast.error(error?.response?.data.message);
-          setShowModalConfirm(false)
-        }
-      };
-    
-      const handleDeleteAllRewards = async () => {
-        try {
-          const idsToDelete = rewardList!
-            .map((item) => item.id.toString())
-            .filter((id): id is string => id !== undefined);
-          await deleteAward(idsToDelete);
-          toast.success("Xóa danh sách giải thưởng thành công");
-          setRewardList([]);
-          setShowModalConfirm(false);
-        } catch (error: any) {
-          toast.error(error?.response?.data.message);
-          setShowModalConfirm(false)
-        }
-      };
+    try {
+      await deleteAward([id]);
+      toast.success("Xóa giải thưởng thành công");
+      const newRewardList = rewardList!.filter(
+        (item) => item.id != parseInt(id)
+      );
+      setRewardList(newRewardList);
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
+      setShowModalConfirm(false);
+    }
+  };
+
+  const handleDeleteAllRewards = async () => {
+    try {
+      const idsToDelete = rewardList!
+        .map((item) => item.id.toString())
+        .filter((id): id is string => id !== undefined);
+      await deleteAward(idsToDelete);
+      toast.success("Xóa danh sách giải thưởng thành công");
+      setRewardList([]);
+      setShowModalConfirm(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data.message);
+      setShowModalConfirm(false);
+    }
+  };
 
   const columns: ColumnType[] = [
     {
@@ -124,8 +131,8 @@ const PrizeMangement = () => {
           okText="Có"
           cancelText="Không"
         >
-           <Button type="primary" danger style={{ fontWeight: "bold" }}>
-           <ImCross /> Xóa
+          <Button type="primary" danger style={{ fontWeight: "bold" }}>
+            <ImCross /> Xóa
           </Button>
         </Popconfirm>
       ),
@@ -157,7 +164,10 @@ const PrizeMangement = () => {
           </Button>
         </div>
         {/* search */}
-        <Search className={style["search__input"]} onChange={(e) => handleSearchValue(e.target.value)}/>
+        <Search
+          className={style["search__input"]}
+          onChange={(e) => handleSearchValue(e.target.value)}
+        />
       </div>
       {/* table */}
       <AntDCustomTable
@@ -209,45 +219,45 @@ const PrizeMangement = () => {
         </Form>
       </Modal>
 
-       {/* Modal for confirm delete awards */}
+      {/* Modal for confirm delete awards */}
       <Modal
-              onCancel={() => {
+        onCancel={() => {
+          setShowModalConfirm(false);
+        }}
+        open={showModalConfirm}
+        footer={[
+          <div
+            style={{ display: "flex", justifyContent: "center", gap: "12px" }}
+          >
+            <Button
+              key="back"
+              onClick={() => {
                 setShowModalConfirm(false);
               }}
-              open={showModalConfirm}
-              footer={[
-                <div
-                  style={{ display: "flex", justifyContent: "center", gap: "12px" }}
-                >
-                  <Button
-                    key="back"
-                    onClick={() => {
-                      setShowModalConfirm(false);
-                    }}
-                  >
-                    Hủy
-                  </Button>
-                  <Button type="primary" onClick={() => handleDeleteAllRewards()}>
-                    Ok
-                  </Button>
-                </div>,
-              ]}
             >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                  alignItems: "center",
-                }}
-              >
-                <CiCircleAlert size={50} color="orange" />
-                <h2>Xóa tất cả</h2>
-                <div style={{ fontSize: "23px", textAlign: "center" }}>
-                  Bạn có chắc muốn xóa toàn bộ danh sách giải thưởng không?
-                </div>
-              </div>
-            </Modal>
+              Hủy
+            </Button>
+            <Button type="primary" onClick={() => handleDeleteAllRewards()}>
+              Ok
+            </Button>
+          </div>,
+        ]}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            alignItems: "center",
+          }}
+        >
+          <CiCircleAlert size={50} color="orange" />
+          <h2>Xóa tất cả</h2>
+          <div style={{ fontSize: "23px", textAlign: "center" }}>
+            Bạn có chắc muốn xóa toàn bộ danh sách giải thưởng không?
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

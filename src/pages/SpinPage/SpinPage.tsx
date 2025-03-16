@@ -2,7 +2,11 @@ import { Button, Card, Modal, Select, Typography } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { TiArrowSortedDown } from "react-icons/ti";
 import RollingSlot from "../../components/RollingSlot/RollingSlot";
-import { getRollingNumber, saveWinner } from "../../service/event/api";
+import {
+  getRollingNumber,
+  saveWinner,
+  getWinnerList,
+} from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
 import style from "./SpinPage.module.scss";
 import "./select.scss";
@@ -11,7 +15,16 @@ import { toast } from "react-toastify";
 
 const SpinPage = () => {
   const { Title, Text } = Typography;
-  const { participantList, eventSetting, rewardList } = useAppStore.getState();
+  const {
+    participantList,
+    eventSetting,
+    rewardList,
+    setWinnerList,
+    winnerList,
+  } = useAppStore.getState();
+  console.log("reward list", rewardList);
+  console.log("winner list", winnerList);
+
   const [remainingParticipants, setRemainingParticipants] =
     useState(participantList);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -19,6 +32,8 @@ const SpinPage = () => {
   const [winnerPerRoll, setWinnerPerRoll] = useState<number>(0);
   // Lấy rewardID
   const [selectedReward, setSelectedReward] = useState<number>(0);
+  console.log(selectedReward);
+
   // Lấy rollingNumber
   const [rollingTurns, setRollingTurnsLeft] = useState<number>(0);
   // Lấy mảng winnerId
@@ -66,6 +81,12 @@ const SpinPage = () => {
       };
       console.log("Payload gửi lên:", payload);
       await saveWinner(payload);
+
+      // Fetch the updated winner list
+      const res = await getWinnerList(eventSetting!.eventId.toString());
+      const updatedWinnerList = res.data.data;
+      setWinnerList(updatedWinnerList);
+
       // Cấm quay tiếp giải này sau khi lưu
       if (rollingTurns === 0) {
         setIsSpinDisabled(true);
@@ -79,7 +100,13 @@ const SpinPage = () => {
     } catch (error) {
       console.log("Lỗi khi lưu kết quả:", error);
     }
-  }, [selectedReward, winnerId, rollingTurns]);
+  }, [
+    selectedReward,
+    winnerId,
+    rollingTurns,
+    eventSetting?.eventId,
+    setWinnerList,
+  ]);
   // ------------------------------------------------------------------------------------------
 
   // ---------------------------------- Hàm lấy số lượt quay ----------------------------------
@@ -102,6 +129,29 @@ const SpinPage = () => {
       handleFetchSlotRoll(selectedReward);
     }
   }, [selectedReward, handleFetchSlotRoll]);
+
+  // Kiểm tra số lượt quay đã đạt giới hạn
+  useEffect(() => {
+    if (selectedReward !== 0) {
+      const selectedRewardData = rewardList?.find(
+        (item) => item.id === selectedReward
+      );
+      const rollingNumber = selectedRewardData?.rollingNumber;
+      const winnersForSelectedReward = winnerList?.filter(
+        (winner) => winner.rollingOrder === rollingNumber
+      );
+      if (
+        selectedRewardData &&
+        winnersForSelectedReward &&
+        winnersForSelectedReward.length >=
+          selectedRewardData.winnerNumber * selectedRewardData.rollingNumber
+      ) {
+        setIsSpinDisabled(true);
+      } else {
+        setIsSpinDisabled(false);
+      }
+    }
+  }, [selectedReward, rewardList, winnerList]);
 
   // ------------------------------------ Hàm để quay ------------------------------------------
   const spin = () => {
@@ -216,8 +266,18 @@ const SpinPage = () => {
             }
           >
             <span>
-              Lượt quay còn lại:{" "}
-              {selectedReward === 0 ? "Chưa chọn giải quay" : rollingTurns}
+              {selectedReward === 0
+                ? "Chưa chọn giải quay"
+                : rollingTurns > 0
+                ? `Lượt quay còn lại: ${rollingTurns}`
+                : winnerList?.some(
+                    (winner) =>
+                      winner.rollingOrder ===
+                      rewardList!.find((item) => item.id === selectedReward)
+                        ?.rollingNumber
+                  )
+                ? "Giải này đã có kết quả 🎉"
+                : "Lượt quay còn lại: 0"}
             </span>
           </div>
           <button

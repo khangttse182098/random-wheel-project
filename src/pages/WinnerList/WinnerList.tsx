@@ -1,16 +1,17 @@
 import { Button, Modal, Popconfirm } from "antd";
 import Search from "antd/es/input/Search";
 import { ColumnType } from "antd/es/table";
+import { useState } from "react";
+import { CiCircleAlert } from "react-icons/ci";
 import { FaRegFileExcel } from "react-icons/fa";
 import { ImCross } from "react-icons/im";
+import { toast } from "react-toastify";
 import AntDCustomTable from "../../components/cTableAntD/cTableAntD";
 import { WinnerData } from "../../models/winner";
-import useAppStore from "../../store/useAppStore";
-import style from "./WinnerList.module.scss";
 import { deleteWinnerList } from "../../service/participant/api";
-import { toast } from "react-toastify";
-import { CiCircleAlert } from "react-icons/ci";
-import { useState } from "react";
+import useAppStore from "../../store/useAppStore";
+import { formatDate } from "../../utils/dateUtils";
+import style from "./WinnerList.module.scss";
 
 const WinnerList = () => {
   const { winnerList, setWinnerList } = useAppStore.getState();
@@ -19,11 +20,11 @@ const WinnerList = () => {
   const handleDeleteAttendanceReward = async (id: string) => {
     try {
       await deleteWinnerList([id]);
-      toast.success("Xóa người trúng giải thành công");
       const newWinnerList = winnerList!.filter(
         (item) => item.attendanceRewardId != parseInt(id)
       );
       setWinnerList(newWinnerList);
+      toast.success("Xóa người trúng giải thành công");
     } catch (error: any) {
       toast.error(error?.response?.data.message);
     }
@@ -56,6 +57,9 @@ const WinnerList = () => {
     {
       title: "Ngày trúng thưởng",
       dataIndex: "awardDate",
+      render: (_: any, record) => {
+        return <div>{formatDate(record.awardDate)}</div>;
+      },
     },
     {
       title: "Tên giải",
