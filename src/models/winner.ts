@@ -7,4 +7,5 @@ export interface WinnerData {
   participantName: string;
   department: string;
   code: string;
+  attendanceRewardId: number;
 }
