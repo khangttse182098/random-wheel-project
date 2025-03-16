@@ -5,19 +5,30 @@ import { FaPhoneAlt } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { FaLocationDot } from "react-icons/fa6";
 import { useState } from 'react';
-import { Button, Modal, Input  } from 'antd';
+import { Button, Modal, Input, Form } from 'antd';
+
 
 const AccountInfo = () => {
 
   const [isModalOpenPassword, setIsModalOpenPassword] = useState(false);
   const [isModalOpenInformation, setIsModalOpenInformation] = useState(false);
+  const [form] = Form.useForm();
 
   const showModalPassword = () => {
     setIsModalOpenPassword(true);
   };
 
   const handleOkPassword = () => {
-    setIsModalOpenPassword(false);
+    form.validateFields().then(values => {
+      const { password, newPassword, confirmPassword } = values;
+      console.log("Password:", password);
+      console.log("New Password:", newPassword);
+      console.log("Confirm Password:", confirmPassword);
+      // Add your logic to handle password change here
+      setIsModalOpenPassword(false);
+    }).catch(info => {
+      console.log('Validate Failed:', info);
+    });
   };
 
   const handleCancelPassword = () => {
@@ -90,23 +101,48 @@ const AccountInfo = () => {
         onOk={handleOkPassword} 
         onCancel={handleCancelPassword} footer={null}>
           <hr></hr>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
-        <label>Nhập mật khẩu cũ</label>
-        <Input.Password placeholder="Nhập mật khẩu cũ" />
-
-        <label>Nhập mật khẩu mới</label>
-        <Input.Password placeholder="Nhập mật khẩu mới" />
-
-        <label>Nhập lại mật khẩu mới</label>
-        <Input.Password placeholder="Nhập lại mật khẩu mới" />
-
-        <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "20px" }}>
-          <Button type="primary" style={{ backgroundColor: "#c82333" }} onClick={handleCancelPassword}>Đóng</Button>
-          <Button type="primary" onClick={handleOkPassword} style={{ backgroundColor: "rgb(21, 120, 21)", borderColor: "#28a745" }}>
-            Xác nhận
-          </Button>
-        </div>
-      </div>
+          <Form form={form} layout="vertical" style={{ marginTop: "15px" }}>
+              <Form.Item
+                name="password"
+                label="Nhập mật khẩu cũ"
+                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ' }]}
+              >
+                <Input.Password placeholder="Nhập mật khẩu cũ" />
+              </Form.Item>
+              <Form.Item
+            name="newPassword"
+            label="Nhập mật khẩu mới"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới' }]}
+          >
+            <Input.Password placeholder="Nhập mật khẩu mới" />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            label="Nhập lại mật khẩu mới"
+            dependencies={['newPassword']}
+            rules={[
+              { required: true, message: 'Vui lòng nhập lại mật khẩu mới' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('newPassword') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Mật khẩu mới không khớp'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="Nhập lại mật khẩu mới" />
+          </Form.Item>
+          <Form.Item>
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "10px" }}>
+              <Button type="primary" style={{ backgroundColor: "#c82333" }} onClick={handleCancelPassword}>Đóng</Button>
+              <Button type="primary" onClick={handleOkPassword} style={{ backgroundColor: "rgb(21, 120, 21)", borderColor: "#28a745" }}>
+                Xác nhận
+              </Button>
+            </div>
+          </Form.Item>
+          </Form>
     </Modal>
     {/* INFORMATION MODAL */}
     <Modal title="CẬP NHẬT THÔNG TIN" open={isModalOpenInformation} onOk={handleOkInformation} onCancel={handleCancelInformation} footer={null}>

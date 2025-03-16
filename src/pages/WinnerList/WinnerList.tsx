@@ -37,9 +37,10 @@ const WinnerList = () => {
         await deleteWinnerList(idsToDelete);
         toast.success("Xóa danh sách người trúng giải thành công");
         setWinnerList([]);
-      //  setShowModal(false);
+        setShowModal(false);
       } catch (error: any) {
         toast.error(error?.response?.data.message);
+        setShowModal(false);
       }
     };
  

@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Form, Input, Modal, Popconfirm } from "antd";
 import { ImCross } from "react-icons/im";
 import style from "./PrizeMangement.module.scss";
 import { FaPlus } from "react-icons/fa";
@@ -9,14 +9,15 @@ import useAppStore from "../../store/useAppStore";
 import { CreateRewardData, RewardData } from "../../models/reward";
 import { toast } from "react-toastify";
 import { useCallback, useState } from "react";
-import { createAward } from "../../service/event/api";
+import { createAward, deleteAward } from "../../service/event/api";
+import { CiCircleAlert } from "react-icons/ci";
 
 const PrizeMangement = () => {
   const [form] = Form.useForm();
   const { rewardList, setRewardList } = useAppStore.getState();
   const { chooseEvent } = useAppStore((state) => state);
-
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
 
   
   const handleCreatePrize = useCallback(async () => {
@@ -58,6 +59,36 @@ const PrizeMangement = () => {
       
   }
 
+  // handle one and many
+  const handleDeleteReward = async (id: string) => {
+        try {
+          await deleteAward([id]);
+          toast.success("Xóa giải thưởng thành công");
+          const newRewardList = rewardList!.filter(
+            (item) => item.id != parseInt(id)
+          );
+          setRewardList(newRewardList);
+        } catch (error: any) {
+          toast.error(error?.response?.data.message);
+          setShowModalConfirm(false)
+        }
+      };
+    
+      const handleDeleteAllRewards = async () => {
+        try {
+          const idsToDelete = rewardList!
+            .map((item) => item.id.toString())
+            .filter((id): id is string => id !== undefined);
+          await deleteAward(idsToDelete);
+          toast.success("Xóa danh sách giải thưởng thành công");
+          setRewardList([]);
+          setShowModalConfirm(false);
+        } catch (error: any) {
+          toast.error(error?.response?.data.message);
+          setShowModalConfirm(false)
+        }
+      };
+
   const columns: ColumnType[] = [
     {
       title: "STT",
@@ -84,15 +115,19 @@ const PrizeMangement = () => {
     {
       title: "Chức năng",
       dataIndex: "function",
-      render: () => (
-        <Button
-          icon={<ImCross />}
-          className={style["setting__opt"]}
+      render: (_, record) => (
+        <Popconfirm
           color="danger"
-          variant="solid"
+          title="Xóa giải thưởng"
+          description="Bạn có chắc muốn xóa giải thưởng này không?"
+          onConfirm={() => handleDeleteReward(record.id!.toString())}
+          okText="Có"
+          cancelText="Không"
         >
-          Xoá
-        </Button>
+           <Button type="primary" danger style={{ fontWeight: "bold" }}>
+           <ImCross /> Xóa
+          </Button>
+        </Popconfirm>
       ),
     },
   ];
@@ -116,6 +151,7 @@ const PrizeMangement = () => {
             color="danger"
             variant="solid"
             icon={<ImCross />}
+            onClick={() => setShowModalConfirm(true)}
           >
             Xoá tất cả
           </Button>
@@ -172,6 +208,46 @@ const PrizeMangement = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+       {/* Modal for confirm delete awards */}
+      <Modal
+              onCancel={() => {
+                setShowModalConfirm(false);
+              }}
+              open={showModalConfirm}
+              footer={[
+                <div
+                  style={{ display: "flex", justifyContent: "center", gap: "12px" }}
+                >
+                  <Button
+                    key="back"
+                    onClick={() => {
+                      setShowModalConfirm(false);
+                    }}
+                  >
+                    Hủy
+                  </Button>
+                  <Button type="primary" onClick={() => handleDeleteAllRewards()}>
+                    Ok
+                  </Button>
+                </div>,
+              ]}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  alignItems: "center",
+                }}
+              >
+                <CiCircleAlert size={50} color="orange" />
+                <h2>Xóa tất cả</h2>
+                <div style={{ fontSize: "23px", textAlign: "center" }}>
+                  Bạn có chắc muốn xóa toàn bộ danh sách giải thưởng không?
+                </div>
+              </div>
+            </Modal>
     </div>
   );
 };

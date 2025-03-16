@@ -135,6 +135,7 @@ const ContestantList = () => {
       setShowModal(false);
     } catch (error: any) {
       toast.error(error?.response?.data.message);
+      setShowModal(false);
     }
   };
 
