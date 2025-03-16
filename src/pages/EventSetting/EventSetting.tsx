@@ -9,6 +9,7 @@ import {
   Image,
   Modal,
   Row,
+  Spin,
   Typography,
   Upload,
 } from "antd";
@@ -29,13 +30,14 @@ type Color = Extract<
   string | { cleared: any }
 >;
 const EventSetting = () => {
-  const { eventSetting } = useAppStore((state) => state);
+  const { eventSetting, setEventSetting } = useAppStore((state) => state);
 
   // information for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenShow, setIsModalOpenShow] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -57,8 +59,10 @@ const EventSetting = () => {
 
   const handleUpload = async (file: File, setImage: (url: string) => void) => {
     try {
+      setIsLoadingImage((prev) => !prev);
       const result = await uploadImage(file);
       setImage(result.secure_url);
+      setIsLoadingImage((prev) => !prev);
       toast.success("Image uploaded successfully");
     } catch (error) {
       toast.error("Image upload failed");
@@ -183,6 +187,8 @@ const EventSetting = () => {
         showLogo,
         showEventName,
       };
+
+      setEventSetting({ ...eventSetting!, ...payload });
       await updateEventSetting(eventSetting!.id, payload);
       toast.success("Cập nhật cấu hình sự kiện thành công");
     } catch (error) {
@@ -437,6 +443,15 @@ const EventSetting = () => {
 
         <hr></hr>
 
+        {isLoadingImage ? (
+          <Spin
+            style={{
+              position: "absolute",
+              marginLeft: "480px",
+              marginTop: "70px",
+            }}
+          />
+        ) : null}
         {/* Image Upload Sections */}
         <Row gutter={16} style={{ marginBottom: 16, marginTop: 10 }}>
           <Col span={16}>
@@ -561,6 +576,7 @@ const EventSetting = () => {
               handleUpdateEventSetting();
               setIsModalOpenShow(false);
             }}
+            disabled={isLoadingImage}
           >
             Lưu
           </Button>

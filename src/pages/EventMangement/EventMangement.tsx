@@ -342,7 +342,7 @@ const EventMangement = () => {
               className={style["edit__button"]}
               color="danger"
               variant="solid"
-              onClick={() => {
+              onClick={async () => {
                 resetAllEventData();
                 addChooseEvent({
                   id: eventData.id,
@@ -350,10 +350,15 @@ const EventMangement = () => {
                   created_at: eventData.createdAt,
                   expiry_date: eventData.expiryDate,
                 });
-                fetchParticipantList(eventData.id);
-                fetchEventSetting(eventData.id);
-                fetchRewardList(eventData.id);
-                fetchWinnerList(eventData.id);
+                // Wait for all fetch functions to complete
+                await Promise.all([
+                  fetchParticipantList(eventData.id),
+                  fetchEventSetting(eventData.id),
+                  fetchRewardList(eventData.id),
+                  fetchWinnerList(eventData.id),
+                ]);
+
+                // Navigate after all fetches are complete
                 navigate("/event-setting");
               }}
             >
