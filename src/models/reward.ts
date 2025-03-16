@@ -10,7 +10,7 @@ export interface RewardData {
 
 export interface CreateRewardData {
   eventId: string;
-  name: string;
+  rewardName: string;
   rollingNumber: number;
   winnerNumber: number;
   createdAt: string;
