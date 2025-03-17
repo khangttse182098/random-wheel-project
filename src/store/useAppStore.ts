@@ -64,7 +64,7 @@ const useAppStore = create<StoreType>()(
     }),
     {
       name: "EventData",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
 
       merge: (persistedState, currentState) => ({
         ...currentState,
