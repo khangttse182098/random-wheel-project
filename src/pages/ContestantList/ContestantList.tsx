@@ -19,6 +19,7 @@ import {
 import {
   createParticipant,
   deleteParticipant,
+  getParticipantList,
   updateParticipant,
 } from "../../service/participant/api";
 import useAppStore from "../../store/useAppStore";
@@ -108,6 +109,8 @@ const ContestantList = () => {
         })
       );
       await createParticipant(savedData);
+      const updatedContestantList = await getParticipantList(chooseEvent!.id);
+      setParticipantList(updatedContestantList.data.data);
       toast.success("Lưu danh sách người tham dự thành công");
     } catch (error) {
       toast.error("Lỗi khi lưu danh sách người tham dự");

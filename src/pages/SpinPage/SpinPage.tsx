@@ -22,9 +22,6 @@ const SpinPage = () => {
     setWinnerList,
     winnerList,
   } = useAppStore((state) => state);
-  console.log("reward list", rewardList);
-  console.log("winner list", winnerList);
-  console.log("participant list", participantList);
 
   const [remainingParticipants, setRemainingParticipants] =
     useState(participantList);
@@ -33,7 +30,6 @@ const SpinPage = () => {
   const [winnerPerRoll, setWinnerPerRoll] = useState<number>(0);
   // Lấy rewardID
   const [selectedReward, setSelectedReward] = useState<number>(0);
-  console.log(selectedReward);
 
   // Lấy rollingNumber
   const [rollingTurns, setRollingTurnsLeft] = useState<number>(0);
