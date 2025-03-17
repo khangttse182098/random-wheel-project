@@ -13,7 +13,7 @@ const SignIn = () => {
   const [form] = useForm();
   const navigate = useNavigate();
   const location = useLocation();
-  const { setUser } = useAppStore.getState();
+  const { setUser } = useAppStore((state) => state);
 
   //check if there is error message thrown out
   useEffect(() => {

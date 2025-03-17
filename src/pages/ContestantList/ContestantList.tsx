@@ -74,20 +74,23 @@ const ContestantList = () => {
 
   // handle search
   const handleSearchValue = (value: string) => {
-    if (value.trim() === '') {
+    if (value.trim() === "") {
       // Reset to the original participant list when the search value is empty
       setParticipantList(useAppStore.getState().participantList || []);
       return;
     }
-    
-    const filteredParticipants = participantList?.filter((participant) => {
-      return participant.fullName.includes(value) 
-        || participant.code.includes(value) 
-        || participant.department.includes(value);
-    }) || [];
-  
+
+    const filteredParticipants =
+      participantList?.filter((participant) => {
+        return (
+          participant.fullName.includes(value) ||
+          participant.code.includes(value) ||
+          participant.department.includes(value)
+        );
+      }) || [];
+
     setParticipantList(filteredParticipants);
-  }
+  };
 
   const handleSaveParticipantList = useCallback(async () => {
     if (participantList!.length === 0) {
@@ -352,7 +355,10 @@ const ContestantList = () => {
           </Button>
         </div>
         {/* search */}
-        <Search className={style["search__input"]} onChange={(e) => handleSearchValue(e.target.value)}/>
+        <Search
+          className={style["search__input"]}
+          onChange={(e) => handleSearchValue(e.target.value)}
+        />
       </div>
       {/* table */}
       <AntDCustomTable columns={columns} dataSource={participantList!} />

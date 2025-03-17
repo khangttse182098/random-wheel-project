@@ -5,7 +5,7 @@ import style from "./SpinLayout.module.scss";
 import { useNavigate } from "react-router";
 
 const SpinLayout = () => {
-  const { eventSetting, user } = useAppStore.getState();
+  const { eventSetting, user } = useAppStore((state) => state);
   const navigate = useNavigate();
 
   //navigate to login page if not login yet
