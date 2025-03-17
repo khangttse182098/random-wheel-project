@@ -82,7 +82,8 @@ const EventMenu = () => {
           DANH SÁCH TRÚNG GIẢI
         </NavLink>
         <NavLink
-          to="/spin-page"
+          to={`/spin-page?user=${encodeURIComponent(user.userName)}`}
+          target="_blank"
           className={({ isActive }) =>
             isActive
               ? `${style["nav-link"]} ${style["active"]}`
