@@ -61,7 +61,7 @@ const RollingSlot: React.FC<RollingSlotProps> = ({
   previousCode,
 }) => {
   const slotRef = useRef<HTMLUListElement>(null);
-  const { eventSetting } = useAppStore.getState();
+  const { eventSetting } = useAppStore((state) => state);
 
   useEffect(() => {
     const valuePosition = charList.indexOf(currentCode);

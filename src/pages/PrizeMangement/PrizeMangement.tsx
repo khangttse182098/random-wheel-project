@@ -18,7 +18,7 @@ import style from "./PrizeMangement.module.scss";
 
 const PrizeMangement = () => {
   const [form] = Form.useForm();
-  const { rewardList, setRewardList } = useAppStore.getState();
+  const { rewardList, setRewardList } = useAppStore((state) => state);
   const { chooseEvent } = useAppStore((state) => state);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);

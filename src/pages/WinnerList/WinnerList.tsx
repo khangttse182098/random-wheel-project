@@ -14,7 +14,7 @@ import { formatDate } from "../../utils/dateUtils";
 import style from "./WinnerList.module.scss";
 
 const WinnerList = () => {
-  const { winnerList, setWinnerList } = useAppStore.getState();
+  const { winnerList, setWinnerList } = useAppStore((state) => state);
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const handleDeleteAttendanceReward = async (id: string) => {

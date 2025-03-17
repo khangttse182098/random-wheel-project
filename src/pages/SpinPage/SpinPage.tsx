@@ -21,9 +21,10 @@ const SpinPage = () => {
     rewardList,
     setWinnerList,
     winnerList,
-  } = useAppStore.getState();
+  } = useAppStore((state) => state);
   console.log("reward list", rewardList);
   console.log("winner list", winnerList);
+  console.log("participant list", participantList);
 
   const [remainingParticipants, setRemainingParticipants] =
     useState(participantList);
@@ -155,18 +156,24 @@ const SpinPage = () => {
 
   // ------------------------------------ Hàm để quay ------------------------------------------
   const spin = () => {
-    let selectedWinners: string[] = [];
+    const selectedWinners: string[] = [];
     for (let i = 0; i < winnerPerRoll; i++) {
       const randomCode = handldeGetRandomCode();
       if (randomCode) {
         selectedWinners.push(randomCode.join(""));
       }
     }
+    console.log("winnerPerRoll", winnerPerRoll);
+
+    console.log("selectedWinner", selectedWinners);
 
     // Tìm danh sách những người trúng thưởng
+    console.log("participantList", participantList);
+
     const winnersList = selectedWinners.map((code) =>
       participantList?.find((item) => item.code === code)
     );
+
     // Cập nhật danh sách winners
     setWinners(winnersList);
 
@@ -174,8 +181,15 @@ const SpinPage = () => {
       .map((code) => participantList?.find((item) => item.code === code)?.id) // Có thể trả về undefined
       .filter((id): id is string => id !== undefined) // Lọc bỏ undefined
       .map((id) => parseInt(id, 10)); // Chuyển đổi sang number
+
+    // set id danh sách trúng thưởng
+    console.log("winner: ", winner);
+
     setWinnerId(winner);
 
+    {
+      /* <Footer /> */
+    }
     //set previousCode
     setPreviousCode(spinKey ? code : previousCode);
 
