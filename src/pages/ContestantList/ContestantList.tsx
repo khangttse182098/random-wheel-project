@@ -35,7 +35,7 @@ const ContestantList = () => {
   const { chooseEvent, participantList, setParticipantList } = useAppStore(
     (state) => state
   );
-  const eventID = chooseEvent?.id;
+  const eventId = chooseEvent?.id;
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -51,7 +51,22 @@ const ContestantList = () => {
       department: String(row.getCell(3).value || ""),
     }));
 
-    setParticipantList(importedData);
+    const newParticipantList = importedData.map((item) => ({
+      ...item,
+      eventId,
+      status: true,
+    }));
+
+    setParticipantList(newParticipantList);
+    await createParticipant(
+      newParticipantList.map((item) => ({
+        code: item.code,
+        fullName: item.fullName,
+        department: item.department,
+        status: item.status,
+        eventId,
+      })) as CreateParticipantData[]
+    );
   };
 
   const handleExportTemplate = () => {
@@ -105,7 +120,7 @@ const ContestantList = () => {
           fullName: item.fullName,
           department: item.department,
           status: true,
-          eventId: eventID!,
+          eventId: eventId!,
         })
       );
       await createParticipant(savedData);
@@ -115,7 +130,7 @@ const ContestantList = () => {
     } catch (error) {
       toast.error("Lỗi khi lưu danh sách người tham dự");
     }
-  }, [participantList, eventID]);
+  }, [participantList, eventId]);
 
   const handleDeleteParticipant = async (id: string) => {
     try {
@@ -166,7 +181,7 @@ const ContestantList = () => {
           code: originalRecord.code,
           fullName: originalRecord.fullName,
           department: originalRecord.department,
-          eventId: eventID!,
+          eventId: eventId!,
         };
 
         if (editingRecord.code !== originalRecord.code) {
@@ -201,7 +216,7 @@ const ContestantList = () => {
         toast.error("Lỗi khi cập nhật dữ liệu");
       }
     },
-    [editingRecord, eventID, participantList, setParticipantList]
+    [editingRecord, eventId, participantList, setParticipantList]
   );
 
   const handleCancelEdit = () => {

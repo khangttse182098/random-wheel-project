@@ -67,43 +67,46 @@ const SpinPage = () => {
   // ------------------------------------------------------------------------------------------
 
   // --------------------------- Hàm lưu kết quả người trúng thưởng ---------------------------
-  const handleSaveWinner = useCallback(async () => {
-    if (!winnerId.length) return alert("Chưa có người trúng thưởng!");
+  const handleSaveWinner = useCallback(
+    async (updatedWinnerId: number[]) => {
+      if (!updatedWinnerId.length) return alert("Chưa có người trúng thưởng!");
 
-    try {
-      const payload = {
-        rewardId: selectedReward,
-        winnersId: winnerId, // Mảng danh sách người thắng
-        rollingOrder: rollingTurns + 1,
-      };
-      console.log("Payload gửi lên:", payload);
-      await saveWinner(payload);
+      try {
+        const payload = {
+          rewardId: selectedReward,
+          winnersId: winnerId, // Mảng danh sách người thắng
+          rollingOrder: rollingTurns + 1,
+        };
+        console.log("Payload gửi lên:", payload);
+        await saveWinner(payload);
 
-      // Fetch the updated winner list
-      const res = await getWinnerList(eventSetting!.eventId.toString());
-      const updatedWinnerList = res.data.data;
-      setWinnerList(updatedWinnerList);
+        // Fetch the updated winner list
+        const res = await getWinnerList(eventSetting!.eventId.toString());
+        const updatedWinnerList = res.data.data;
+        setWinnerList(updatedWinnerList);
 
-      // Cấm quay tiếp giải này sau khi lưu
-      if (rollingTurns === 0) {
-        setIsSpinDisabled(true);
+        // Cấm quay tiếp giải này sau khi lưu
+        if (rollingTurns === 0) {
+          setIsSpinDisabled(true);
+        }
+        // Loại người đã trúng khỏi danh sách quay
+        setRemainingParticipants((prev: any) =>
+          prev.filter((p: any) => !winnerId.includes(parseFloat(p.id)))
+        );
+        setShowModal(false);
+        toast.success("Đã lưu danh sách người trúng thưởng!");
+      } catch (error) {
+        console.log("Lỗi khi lưu kết quả:", error);
       }
-      // Loại người đã trúng khỏi danh sách quay
-      setRemainingParticipants((prev: any) =>
-        prev.filter((p: any) => !winnerId.includes(parseFloat(p.id)))
-      );
-      setShowModal(false);
-      toast.success("Đã lưu danh sách người trúng thưởng!");
-    } catch (error) {
-      console.log("Lỗi khi lưu kết quả:", error);
-    }
-  }, [
-    selectedReward,
-    winnerId,
-    rollingTurns,
-    eventSetting?.eventId,
-    setWinnerList,
-  ]);
+    },
+    [
+      selectedReward,
+      winnerId,
+      rollingTurns,
+      eventSetting?.eventId,
+      setWinnerList,
+    ]
+  );
   // ------------------------------------------------------------------------------------------
 
   // ---------------------------------- Hàm lấy số lượt quay ----------------------------------
@@ -179,7 +182,9 @@ const SpinPage = () => {
       .map((id) => parseInt(id, 10)); // Chuyển đổi sang number
 
     // set id danh sách trúng thưởng
-    console.log("winner: ", winner);
+    console.log("winner", winner);
+
+    // console.log("winner: ", winner);
 
     setWinnerId(winner);
 
@@ -326,7 +331,7 @@ const SpinPage = () => {
             >
               Hủy
             </Button>
-            <Button type="primary" onClick={handleSaveWinner}>
+            <Button type="primary" onClick={() => handleSaveWinner(winnerId)}>
               Lưu kết quả
             </Button>
           </div>,
