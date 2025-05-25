@@ -67,7 +67,7 @@ const EventMangement = () => {
         toast.error("Lỗi khi lấy danh sách người tham gia");
       }
     },
-    [setParticipantList]
+    [setParticipantList],
   );
 
   //get reward list
@@ -81,7 +81,7 @@ const EventMangement = () => {
         toast.error("Lỗi khi lấy danh sách giải quay");
       }
     },
-    [setRewardList]
+    [setRewardList],
   );
 
   //get winner list
@@ -95,7 +95,7 @@ const EventMangement = () => {
         toast.error("Lỗi khi lấy cấu hình sự kiện");
       }
     },
-    [setWinnerList]
+    [setWinnerList],
   );
 
   //get event setting
@@ -109,7 +109,7 @@ const EventMangement = () => {
         toast.error("Lỗi khi lấy cấu hình sự kiện");
       }
     },
-    [setEventSetting]
+    [setEventSetting],
   );
 
   //load error if any
@@ -169,7 +169,7 @@ const EventMangement = () => {
         toast.error("Lỗi khi cập nhật dữ liệu");
       }
     },
-    [editingRecord, fetchEventList]
+    [editingRecord, fetchEventList],
   );
 
   const handleCreateEvent = useCallback(async () => {
@@ -216,7 +216,7 @@ const EventMangement = () => {
             value={editingRecord?.name}
             onChange={(e) =>
               setEditingRecord((prev) =>
-                prev ? { ...prev, name: e.target.value } : prev
+                prev ? { ...prev, name: e.target.value } : prev,
               )
             }
           />
@@ -234,7 +234,7 @@ const EventMangement = () => {
               value={editingRecord?.status}
               onChange={(value) =>
                 setEditingRecord((prev) =>
-                  prev ? { ...prev, status: value } : prev
+                  prev ? { ...prev, status: value } : prev,
                 )
               }
             >
@@ -292,7 +292,7 @@ const EventMangement = () => {
             format="DD/MM/YYYY"
             onChange={(time: any) =>
               setEditingRecord((prev) =>
-                prev ? { ...prev, expiryDate: time } : prev
+                prev ? { ...prev, expiryDate: time } : prev,
               )
             }
           />
@@ -310,6 +310,9 @@ const EventMangement = () => {
               className={style["edit__button"]}
               color="green"
               variant="solid"
+              onClick={() => {
+                navigate("/spin-page?user=admin");
+              }}
             >
               Link quay số
             </Button>
