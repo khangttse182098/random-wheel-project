@@ -306,16 +306,6 @@ const EventMangement = () => {
         const { status, ...eventData } = record;
         return (
           <div className={style["button__container"]}>
-            <Button
-              className={style["edit__button"]}
-              color="green"
-              variant="solid"
-              onClick={() => {
-                navigate("/spin-page?user=admin");
-              }}
-            >
-              Link quay số
-            </Button>
             {editingKey === record.id ? (
               <div style={{ display: "flex", gap: "12px" }}>
                 <FaRegCheckCircle
