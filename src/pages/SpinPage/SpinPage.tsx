@@ -38,10 +38,10 @@ const SpinPage = () => {
 
   const codeList = participantList!.map((item) => item.code);
   const [code, setCode] = useState<string[]>(
-    Array(codeList[0].length).fill("")
+    Array(codeList[0].length).fill(""),
   );
   const [previousCode, setPreviousCode] = useState<string[]>(
-    Array(codeList[0].length).fill("0")
+    Array(codeList[0].length).fill("0"),
   );
   const [spinKey, setSpinKey] = useState(0);
   const [isSpinDisabled, setIsSpinDisabled] = useState(false);
@@ -91,10 +91,16 @@ const SpinPage = () => {
         }
         // Loại người đã trúng khỏi danh sách quay
         setRemainingParticipants((prev: any) =>
-          prev.filter((p: any) => !winnerId.includes(parseFloat(p.id)))
+          prev.filter((p: any) => !winnerId.includes(parseFloat(p.id))),
         );
         setShowModal(false);
         toast.success("Đã lưu danh sách người trúng thưởng!");
+
+        rewardList?.map((reward) => {
+          if (reward.id === selectedReward) {
+            return { ...reward, ["status"]: "Đã quay" };
+          }
+        });
       } catch (error) {
         console.log("Lỗi khi lưu kết quả:", error);
       }
@@ -105,7 +111,7 @@ const SpinPage = () => {
       rollingTurns,
       eventSetting?.eventId,
       setWinnerList,
-    ]
+    ],
   );
   // ------------------------------------------------------------------------------------------
 
@@ -121,7 +127,7 @@ const SpinPage = () => {
         console.log(error);
       }
     },
-    [selectedReward]
+    [selectedReward],
   );
 
   useEffect(() => {
@@ -134,11 +140,11 @@ const SpinPage = () => {
   useEffect(() => {
     if (selectedReward !== 0) {
       const selectedRewardData = rewardList?.find(
-        (item) => item.id === selectedReward
+        (item) => item.id === selectedReward,
       );
       const rollingNumber = selectedRewardData?.rollingNumber;
       const winnersForSelectedReward = winnerList?.filter(
-        (winner) => winner.rollingOrder === rollingNumber
+        (winner) => winner.rollingOrder === rollingNumber,
       );
       if (
         selectedRewardData &&
@@ -170,7 +176,7 @@ const SpinPage = () => {
     console.log("participantList", participantList);
 
     const winnersList = selectedWinners.map((code) =>
-      participantList?.find((item) => item.code === code)
+      participantList?.find((item) => item.code === code),
     );
 
     // Cập nhật danh sách winners
@@ -206,9 +212,12 @@ const SpinPage = () => {
     setRollingTurnsLeft((prev) => prev - 1);
 
     //set waitting time before spinning again
-    setTimeout(() => {
-      setIsSpinDisabled(false);
-    }, (code.length - 0.7) * 3 * 0.3 * 1000);
+    setTimeout(
+      () => {
+        setIsSpinDisabled(false);
+      },
+      (code.length - 0.7) * 3 * 0.3 * 1000,
+    );
   };
   // ------------------------------------------------------------------------------------------
 
@@ -262,7 +271,7 @@ const SpinPage = () => {
             }))}
             onChange={(value) => {
               const selectedReward = rewardList?.find(
-                (item) => item.rewardName === value
+                (item) => item.rewardName === value,
               );
               if (selectedReward) {
                 setSelectedReward(selectedReward.id);
@@ -284,15 +293,15 @@ const SpinPage = () => {
               {selectedReward === 0
                 ? "Chưa chọn giải quay"
                 : rollingTurns > 0
-                ? `Lượt quay còn lại: ${rollingTurns}`
-                : winnerList?.some(
-                    (winner) =>
-                      winner.rollingOrder ===
-                      rewardList!.find((item) => item.id === selectedReward)
-                        ?.rollingNumber
-                  )
-                ? "Giải này đã có kết quả 🎉"
-                : "Lượt quay còn lại: 0"}
+                  ? `Lượt quay còn lại: ${rollingTurns}`
+                  : winnerList?.some(
+                        (winner) =>
+                          winner.rollingOrder ===
+                          rewardList!.find((item) => item.id === selectedReward)
+                            ?.rollingNumber,
+                      )
+                    ? "Giải này đã có kết quả 🎉"
+                    : "Lượt quay còn lại: 0"}
             </span>
           </div>
           <button
@@ -424,7 +433,7 @@ const SpinPage = () => {
                       </Card>
                     )}
                   </motion.div>
-                ) : null
+                ) : null,
               )}
             </div>
           ) : (
