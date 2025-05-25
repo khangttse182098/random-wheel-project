@@ -12,6 +12,7 @@ import style from "./SpinPage.module.scss";
 import "./select.scss";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { RewardData } from "../../models/reward";
 
 const SpinPage = () => {
   const { Title, Text } = Typography;
@@ -20,6 +21,7 @@ const SpinPage = () => {
     eventSetting,
     rewardList,
     setWinnerList,
+    setRewardList,
     winnerList,
   } = useAppStore((state) => state);
 
@@ -96,11 +98,13 @@ const SpinPage = () => {
         setShowModal(false);
         toast.success("Đã lưu danh sách người trúng thưởng!");
 
-        rewardList?.map((reward) => {
-          if (reward.id === selectedReward) {
-            return { ...reward, ["status"]: "Đã quay" };
-          }
-        });
+        setRewardList(
+          rewardList?.map((reward) => {
+            if (reward.id === selectedReward) {
+              return { ...reward, ["status"]: "Đã quay" };
+            }
+          }) as RewardData[],
+        );
       } catch (error) {
         console.log("Lỗi khi lưu kết quả:", error);
       }
