@@ -58,6 +58,7 @@ const SpinPage = () => {
 
     // remove selected participant from participantsList
     remainingParticipants?.splice(randomPosition, 1);
+    console.log(remainingParticipants);
 
     return selectedCode?.split("");
   };
