@@ -7,6 +7,7 @@ export interface Participant {
   isRewarded?: boolean;
   eventId?: string;
   eventName?: string;
+  rewardId?: number[];
 }
 
 export interface UpdateParticipantData {

@@ -13,7 +13,6 @@ import "./select.scss";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { RewardData } from "../../models/reward";
-import { Participant } from "../../models/participant";
 
 const SpinPage = () => {
   const { Title, Text } = Typography;
@@ -114,7 +113,12 @@ const SpinPage = () => {
           (participant) => {
             const currentId = parseInt(participant.id!);
             if (!winnerId.includes(currentId)) {
-              return participant;
+              return {
+                ...participant,
+                ["rewardId"]: participant.rewardId
+                  ? participant.rewardId.push(selectedReward)
+                  : [selectedReward],
+              };
             }
           },
         );
@@ -217,6 +221,8 @@ const SpinPage = () => {
       participantList?.find((item) => item.code === code),
     );
 
+    console.log("winnersList", winnersList);
+
     // Cập nhật danh sách winners
     setWinners(winnersList);
 
@@ -227,8 +233,6 @@ const SpinPage = () => {
 
     // set id danh sách trúng thưởng
     console.log("winner", winner);
-
-    // console.log("winner: ", winner);
 
     setWinnerId(winner);
 
