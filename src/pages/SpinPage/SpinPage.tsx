@@ -75,6 +75,13 @@ const SpinPage = () => {
   };
   // ------------------------------------------------------------------------------------------
 
+  // --------------------------- Hàm huỷ lưu kết quả người trúng thưởng ---------------------------
+
+  const handleCancelWinner = useCallback(() => {
+    console.log("bruhhh");
+
+    setRemainingParticipants(structuredClone(participantList));
+  }, []);
   // --------------------------- Hàm lưu kết quả người trúng thưởng ---------------------------
   const handleSaveWinner = useCallback(
     async (updatedWinnerId: number[]) => {
@@ -347,6 +354,7 @@ const SpinPage = () => {
               onClick={() => {
                 setShowModal(false);
                 setRollingTurnsLeft(rollingTurns + 1); // Khôi phục lượt quay
+                handleCancelWinner();
               }}
             >
               Hủy
