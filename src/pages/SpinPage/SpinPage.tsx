@@ -13,11 +13,13 @@ import "./select.scss";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { RewardData } from "../../models/reward";
+import { Participant } from "../../models/participant";
 
 const SpinPage = () => {
   const { Title, Text } = Typography;
   const {
     participantList,
+    setParticipantList,
     eventSetting,
     rewardList,
     setWinnerList,
@@ -75,11 +77,17 @@ const SpinPage = () => {
   };
   // ------------------------------------------------------------------------------------------
 
+  // --------------------------- Hàm chuyển giải quay ---------------------------
+
+  const handleChangeReward = useCallback(() => {
+    const rewardedParticipants =
+      participantList?.filter((p) => !p.isRewarded) ?? null;
+    setRemainingParticipants(rewardedParticipants);
+  }, []);
+
   // --------------------------- Hàm huỷ lưu kết quả người trúng thưởng ---------------------------
 
   const handleCancelWinner = useCallback(() => {
-    console.log("bruhhh");
-
     setRemainingParticipants(structuredClone(participantList));
   }, []);
   // --------------------------- Hàm lưu kết quả người trúng thưởng ---------------------------
@@ -101,6 +109,17 @@ const SpinPage = () => {
         const updatedWinnerList = res.data.data;
         setWinnerList(updatedWinnerList);
 
+        // Update isRewarded state in participantList
+        const updatedParticipantList = participantList?.filter(
+          (participant) => {
+            const currentId = parseInt(participant.id!);
+            if (!winnerId.includes(currentId)) {
+              return participant;
+            }
+          },
+        );
+        setParticipantList(updatedParticipantList!);
+
         // Cấm quay tiếp giải này sau khi lưu
         if (rollingTurns === 0) {
           setIsSpinDisabled(true);
@@ -117,6 +136,7 @@ const SpinPage = () => {
             if (reward.id === selectedReward) {
               return { ...reward, ["status"]: "Đã quay" };
             }
+            return reward;
           }) as RewardData[],
         );
       } catch (error) {
@@ -296,6 +316,7 @@ const SpinPage = () => {
                 setRollingTurnsLeft(selectedReward.rollingNumber);
                 setIsSpinDisabled(selectedReward.rollingNumber === 0);
               }
+              handleChangeReward();
             }}
           />
           <div
