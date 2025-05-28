@@ -51,10 +51,14 @@ const SpinPage = () => {
   // ----------------------------------- Tạo ra người trúng thưởng ----------------------------
   const handldeGetRandomCode = () => {
     if (remainingParticipants?.length === 0) return [];
-    const selectedCode =
-      remainingParticipants?.[
-        Math.floor(Math.random() * remainingParticipants.length)
-      ].code;
+    const randomPosition = Math.floor(
+      Math.random() * remainingParticipants!.length,
+    );
+    const selectedCode = remainingParticipants?.[randomPosition].code;
+
+    // remove selected participant from participantsList
+    remainingParticipants?.splice(randomPosition, 1);
+
     return selectedCode?.split("");
   };
   // ------------------------------------------------------------------------------------------
