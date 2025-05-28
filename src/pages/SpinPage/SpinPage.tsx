@@ -25,8 +25,9 @@ const SpinPage = () => {
     winnerList,
   } = useAppStore((state) => state);
 
-  const [remainingParticipants, setRemainingParticipants] =
-    useState(participantList);
+  const [remainingParticipants, setRemainingParticipants] = useState(
+    structuredClone(participantList),
+  );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [winners, setWinners] = useState<any>([]);
   const [winnerPerRoll, setWinnerPerRoll] = useState<number>(0);
@@ -58,7 +59,8 @@ const SpinPage = () => {
 
     // remove selected participant from participantsList
     remainingParticipants?.splice(randomPosition, 1);
-    console.log(remainingParticipants);
+    console.log("Remaining participants: ", remainingParticipants);
+    console.log("Participant list: ", participantList);
 
     return selectedCode?.split("");
   };
