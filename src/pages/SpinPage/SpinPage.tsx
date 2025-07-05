@@ -1,21 +1,20 @@
-import { Button, Card, Modal, Select, Typography } from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button, Select } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { TiArrowSortedDown } from "react-icons/ti";
+import { toast } from "react-toastify";
 import RollingSlot from "../../components/RollingSlot/RollingSlot";
+import { RewardData } from "../../models/reward";
 import {
   getRollingNumber,
-  saveWinner,
   getWinnerList,
+  saveWinner,
 } from "../../service/event/api";
 import useAppStore from "../../store/useAppStore";
 import style from "./SpinPage.module.scss";
 import "./select.scss";
-import { motion } from "framer-motion";
-import { toast } from "react-toastify";
-import { RewardData } from "../../models/reward";
 
 const SpinPage = () => {
-  const { Title, Text } = Typography;
   const {
     participantList,
     setParticipantList,
@@ -23,18 +22,20 @@ const SpinPage = () => {
     rewardList,
     setWinnerList,
     setRewardList,
-    winnerList,
   } = useAppStore((state) => state);
 
   const [remainingParticipants, setRemainingParticipants] = useState(
     structuredClone(participantList)
   );
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [winners, setWinners] = useState<any>([]);
+  const [winner, setWinner] = useState<any>(null);
   const [winnerPerRoll, setWinnerPerRoll] = useState<number>(0);
+  console.log(winnerPerRoll);
   const [selectedReward, setSelectedReward] = useState<number>(0);
   const [rollingTurns, setRollingTurnsLeft] = useState<number>(0);
-  const [winnerId, setWinnerId] = useState<number[]>([]);
+  const [winnerId, setWinnerId] = useState<number | null>(null);
+  const [totalRollingTurns, setTotalRollingTurns] = useState<number>(0);
+  console.log(totalRollingTurns);
+  const [currentRollingOrder, setCurrentRollingOrder] = useState<number>(0);
 
   const codeList = participantList!.map((item) => item.code);
   const [code, setCode] = useState<string[]>(
@@ -45,116 +46,111 @@ const SpinPage = () => {
   );
   const [spinKey, setSpinKey] = useState(0);
 
-  // ----------------------------------- Tạo ra người trúng thưởng ----------------------------
-  const handldeGetRandomCode = () => {
-    if (remainingParticipants?.length === 0) return [];
+  // Tạo mã ngẫu nhiên cho người trúng thưởng
+  const handleGetRandomCode = (): {
+    code: string[];
+    participant: any;
+  } | null => {
+    if (remainingParticipants!.length === 0) return null;
+
     const randomPosition = Math.floor(
       Math.random() * remainingParticipants!.length
     );
-    const selectedCode = remainingParticipants?.[randomPosition].code;
+    const selectedParticipant = remainingParticipants![randomPosition];
 
-    // remove selected participant from participantsList
-    remainingParticipants?.splice(randomPosition, 1);
-    console.log("Remaining participants: ", remainingParticipants);
-    console.log("Participant list: ", participantList);
+    const updatedRemaining = [...remainingParticipants!];
+    updatedRemaining.splice(randomPosition, 1);
+    setRemainingParticipants(updatedRemaining);
 
-    return selectedCode?.split("");
+    return {
+      code: selectedParticipant.code.split(""),
+      participant: selectedParticipant,
+    };
   };
-  // ------------------------------------------------------------------------------------------
 
-  // ------------------------------------ Hiện Modal ------------------------------------------
-  const handleSpinAndShowWinners = () => {
-    spin();
-    setTimeout(() => {
-      setShowModal(true);
-    }, 5000);
-  };
-  // ------------------------------------------------------------------------------------------
-
-  // --------------------------- Hàm chuyển giải quay ---------------------------
+  // Chuyển giải quay
   const handleChangeReward = useCallback(() => {
     const rewardedParticipants =
       participantList?.filter((p) => !p.isRewarded) ?? null;
     setRemainingParticipants(rewardedParticipants);
-  }, []);
+  }, [participantList]);
 
-  // --------------------------- Hàm huỷ lưu kết quả người trúng thưởng ---------------------------
+  // Hủy kết quả
   const handleCancelWinner = useCallback(() => {
     setRemainingParticipants(structuredClone(participantList));
-  }, []);
+    setWinner(null);
+    setWinnerId(null);
+    setCode(Array(codeList[0].length).fill(""));
+  }, [participantList, codeList]);
 
-  // --------------------------- Hàm lưu kết quả người trúng thưởng ---------------------------
-  const handleSaveWinner = useCallback(
-    async (updatedWinnerId: number[]) => {
-      if (!updatedWinnerId.length) return alert("Chưa có người trúng thưởng!");
+  // Lưu kết quả người trúng thưởng
+  const handleSaveWinner = useCallback(async () => {
+    if (!winnerId) return toast.error("Chưa có người trúng thưởng!");
 
-      try {
-        const payload = {
-          rewardId: selectedReward,
-          winnersId: winnerId,
-          rollingOrder: rollingTurns + 1,
-        };
-        console.log("Payload gửi lên:", payload);
-        await saveWinner(payload);
+    try {
+      const payload = {
+        rewardId: selectedReward,
+        winnersId: [winnerId],
+        rollingOrder: currentRollingOrder,
+      };
+      await saveWinner(payload);
 
-        // Fetch the updated winner list
-        const res = await getWinnerList(eventSetting!.eventId.toString());
-        const updatedWinnerList = res.data.data;
-        setWinnerList(updatedWinnerList);
+      const res = await getWinnerList(eventSetting!.eventId.toString());
+      setWinnerList(res.data.data);
 
-        // Update isRewarded state in participantList
-        const updatedParticipantList = participantList?.map((participant) => {
-          const currentId = parseInt(participant.id!);
-          if (winnerId.includes(currentId)) {
-            return {
-              ...participant,
-              isRewarded: true,
-              rewardId: participant.rewardId
-                ? [...participant.rewardId, selectedReward]
-                : [selectedReward],
-            };
+      const updatedParticipantList = participantList?.map((participant) => {
+        const currentId = parseInt(participant.id!);
+        if (currentId === winnerId) {
+          return {
+            ...participant,
+            isRewarded: true,
+            rewardId: participant.rewardId
+              ? [...participant.rewardId, selectedReward]
+              : [selectedReward],
+          };
+        }
+        return participant;
+      });
+      setParticipantList(updatedParticipantList!);
+
+      setRemainingParticipants((prev: any) =>
+        prev.filter((p: any) => parseFloat(p.id) !== winnerId)
+      );
+      setRewardList(
+        rewardList?.map((reward) => {
+          if (reward.id === selectedReward) {
+            return { ...reward, status: "Đã quay" };
           }
-          return participant;
-        });
-        setParticipantList(updatedParticipantList!);
+          return reward;
+        }) as RewardData[]
+      );
+      toast.success("Đã lưu người trúng thưởng!");
+      // handleCancelWinner();
+      resetWinnerOnly();
+    } catch (error) {
+      console.log("Lỗi khi lưu kết quả:", error);
+      toast.error("Lỗi khi lưu kết quả!");
+    }
+  }, [
+    selectedReward,
+    winnerId,
+    rollingTurns,
+    eventSetting?.eventId,
+    setWinnerList,
+    setParticipantList,
+    setRewardList,
+    rewardList,
+    handleCancelWinner,
+  ]);
 
-        // Loại người đã trúng khỏi danh sách quay
-        setRemainingParticipants((prev: any) =>
-          prev.filter((p: any) => !winnerId.includes(parseFloat(p.id)))
-        );
-        setShowModal(false);
-        toast.success("Đã lưu danh sách người trúng thưởng!");
-
-        setRewardList(
-          rewardList?.map((reward) => {
-            if (reward.id === selectedReward) {
-              return { ...reward, status: "Đã quay" };
-            }
-            return reward;
-          }) as RewardData[]
-        );
-      } catch (error) {
-        console.log("Lỗi khi lưu kết quả:", error);
-      }
-    },
-    [
-      selectedReward,
-      winnerId,
-      rollingTurns,
-      eventSetting?.eventId,
-      setWinnerList,
-      setParticipantList,
-      setRewardList,
-    ]
-  );
-
-  // ---------------------------------- Hàm lấy số lượt quay ----------------------------------
+  // Lấy số lượt quay
   const handleFetchSlotRoll = useCallback(async (rewardId: number) => {
     try {
       const res = await getRollingNumber(rewardId);
       const data = res.data.data;
-      setRollingTurnsLeft(data.rollingNumber);
       setWinnerPerRoll(data.winnerNumber);
+      setRollingTurnsLeft(data.rollingNumber);
+      setTotalRollingTurns(data.rollingNumber);
     } catch (error) {
       console.log(error);
     }
@@ -166,267 +162,123 @@ const SpinPage = () => {
     }
   }, [selectedReward, handleFetchSlotRoll]);
 
-  // ------------------------------------ Hàm để quay ------------------------------------------
+  const resetWinnerOnly = useCallback(() => {
+    setWinner(null);
+    setWinnerId(null);
+  }, []);
+
+  // Quay số
   const spin = () => {
-    const selectedWinners: string[] = [];
-    for (let i = 0; i < winnerPerRoll; i++) {
-      const randomCode = handldeGetRandomCode();
-      if (randomCode) {
-        selectedWinners.push(randomCode.join(""));
-      }
-    }
-    console.log("winnerPerRoll", winnerPerRoll);
-    console.log("selectedWinner", selectedWinners);
-    console.log("participantList", participantList);
+    if (rollingTurns <= 0) return toast.error("Hết lượt quay!");
 
-    const winnersList = selectedWinners.map((code) =>
-      participantList?.find((item) => item.code === code)
-    );
-    console.log("winnersList", winnersList);
+    const result = handleGetRandomCode();
+    if (!result) return toast.error("Không còn người tham gia!");
 
-    setWinners(winnersList);
+    const { code: randomCode, participant: selectedWinner } = result;
 
-    const winner = selectedWinners
-      .map((code) => participantList?.find((item) => item.code === code)?.id)
-      .filter((id): id is string => id !== undefined)
-      .map((id) => parseInt(id, 10));
+    setWinner(selectedWinner);
+    setWinnerId(selectedWinner ? parseInt(selectedWinner.id!, 10) : null);
 
-    console.log("winner", winner);
-    setWinnerId(winner);
-
-    setPreviousCode(spinKey ? code : previousCode);
-    setCode(
-      selectedWinners[0]?.split("") || Array(codeList[0].length).fill("")
-    );
+    setPreviousCode([...code]);
+    setCode(randomCode);
     setSpinKey((prevKey) => prevKey + 1);
     setRollingTurnsLeft((prev) => prev - 1);
+    setCurrentRollingOrder((prev) => prev + 1);
   };
-  // ------------------------------------------------------------------------------------------
 
   return (
-    <>
-      <div className={style["container"]}>
-        <div className={style["img-container"]}>
-          {eventSetting?.showLogo ? (
-            <img src={eventSetting?.logo} alt="logo" />
-          ) : null}
-        </div>
-        <h2
-          style={
-            { "--titleText": eventSetting?.textColor } as React.CSSProperties
-          }
-          className={style["title"]}
-        >
-          {eventSetting?.showEventName ? eventSetting.eventName : <> </>}
-        </h2>
-        <div
-          className={style["slot-machine"]}
-          style={
-            { "--borderColor": eventSetting?.textColor } as React.CSSProperties
-          }
-        >
-          {code.map((num, index) => (
-            <RollingSlot
-              key={`${spinKey}-${index}`}
-              currentCode={num}
-              delay={index * 0.3}
-              previousCode={previousCode[index]}
-            />
-          ))}
-        </div>
-        <div className={style["button-container"]}>
-          <Select
-            defaultValue="Chọn giải quay"
-            suffixIcon={
-              <TiArrowSortedDown size={20} color={eventSetting?.textColor} />
-            }
-            className={style["select-reward"]}
-            style={
-              {
-                "--selectBg": eventSetting?.buttonColor,
-                "--selectText": eventSetting?.textColor,
-              } as React.CSSProperties
-            }
-            options={rewardList?.map((item) => ({
-              value: item.rewardName,
-              label: item.rewardName,
-            }))}
-            onChange={(value) => {
-              const selectedRewardData = rewardList?.find(
-                (item) => item.rewardName === value
-              );
-              if (selectedRewardData) {
-                setSelectedReward(selectedRewardData.id);
-                setRollingTurnsLeft(selectedRewardData.rollingNumber);
-                handleFetchSlotRoll(selectedRewardData.id);
-                handleChangeReward();
-              }
-            }}
-          />
-          <div
-            className={style["remaining-slot"]}
-            style={
-              {
-                "--buttonBg": eventSetting?.buttonColor,
-                "--buttonText": eventSetting?.textColor,
-              } as React.CSSProperties
-            }
-          >
-            <span>
-              {selectedReward === 0
-                ? "Chưa chọn giải quay"
-                : rollingTurns > 0
-                ? `Lượt quay còn lại: ${rollingTurns}`
-                : winnerList?.some(
-                    (winner) =>
-                      winner.rollingOrder ===
-                      rewardList!.find((item) => item.id === selectedReward)
-                        ?.rollingNumber
-                  )
-                ? "Giải này đã có kết quả 🎉"
-                : "Lượt quay còn lại: 0"}
-            </span>
-          </div>
-          <button
-            onClick={handleSpinAndShowWinners}
-            style={
-              {
-                "--buttonBg": eventSetting?.buttonColor,
-                "--buttonText": eventSetting?.textColor,
-              } as React.CSSProperties
-            }
-            className={style["button"]}
-          >
-            Quay
-          </button>
-        </div>
+    <div className={style["container"]}>
+      <div className={style["img-container"]}>
+        {eventSetting?.showLogo ? (
+          <img src={eventSetting?.logo} alt="logo" />
+        ) : null}
       </div>
-      <Modal
-        onCancel={() => {
-          setShowModal(false);
-          setRollingTurnsLeft(rollingTurns + 1);
-        }}
-        open={showModal}
-        footer={[
-          <div
-            style={{ display: "flex", justifyContent: "center", gap: "12px" }}
-          >
-            <Button
-              key="back"
-              onClick={() => {
-                setShowModal(false);
-                setRollingTurnsLeft(rollingTurns + 1);
-                handleCancelWinner();
-              }}
-            >
-              Hủy
-            </Button>
-            <Button type="primary" onClick={() => handleSaveWinner(winnerId)}>
-              Lưu kết quả
-            </Button>
-          </div>,
-        ]}
+      <h2
+        style={
+          { "--titleText": eventSetting?.textColor } as React.CSSProperties
+        }
+        className={style["title"]}
       >
-        <div style={{ textAlign: "center" }}>
-          <Title level={2} style={{ color: "#2774c7" }}>
-            Kết quả quay số may mắn 🎉
-          </Title>
-          {winners.length > 0 ? (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
-              {winners.map((winner: any, index: any) =>
-                winner ? (
-                  <motion.div
-                    key={winner.id}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.2 }}
-                  >
-                    {winnerPerRoll <= 5 ? (
-                      <Card
-                        style={{
-                          borderRadius: "12px",
-                          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                          textAlign: "center",
-                        }}
-                      >
-                        <Text strong style={{ fontSize: "16px" }}>
-                          Mã số:
-                        </Text>{" "}
-                        <Text style={{ fontSize: "16px" }}>{winner.code}</Text>{" "}
-                        <br />
-                        <Text strong style={{ fontSize: "16px" }}>
-                          Tên:
-                        </Text>{" "}
-                        <Text style={{ fontSize: "16px" }}>
-                          {winner.fullName}
-                        </Text>{" "}
-                        <br />
-                        <Text strong style={{ fontSize: "16px" }}>
-                          Phòng ban:
-                        </Text>{" "}
-                        <Text style={{ fontSize: "16px" }}>
-                          {winner.department}
-                        </Text>
-                      </Card>
-                    ) : (
-                      <Card
-                        style={{
-                          borderRadius: "12px",
-                          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                          textAlign: "center",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-around",
-                            gap: "12px",
-                          }}
-                        >
-                          <Text style={{ fontSize: "16px" }}>
-                            Mã số:{" "}
-                            <Text
-                              style={{ fontSize: "16px", fontWeight: "bold" }}
-                            >
-                              {winner.code}
-                            </Text>
-                          </Text>
-                          <Text style={{ fontSize: "16px" }}>
-                            Tên:{" "}
-                            <Text
-                              style={{ fontSize: "16px", fontWeight: "bold" }}
-                            >
-                              {winner.fullName}
-                            </Text>
-                          </Text>
-                          <Text style={{ fontSize: "16px" }}>
-                            Phòng ban:{" "}
-                            <Text
-                              style={{ fontSize: "16px", fontWeight: "bold" }}
-                            >
-                              {winner.department}
-                            </Text>
-                          </Text>
-                        </div>
-                      </Card>
-                    )}
-                  </motion.div>
-                ) : null
-              )}
-            </div>
-          ) : (
-            <Text
-              type="secondary"
-              style={{ fontSize: "16px", display: "block", marginTop: "12px" }}
-            >
-              Không có người trúng thưởng 😞
-            </Text>
-          )}
+        {eventSetting?.showEventName ? eventSetting.eventName : <> </>}
+      </h2>
+      <div
+        className={style["slot-machine"]}
+        style={
+          { "--borderColor": eventSetting?.textColor } as React.CSSProperties
+        }
+      >
+        {code.map((num, index) => (
+          <RollingSlot
+            key={`${spinKey}-${index}`}
+            currentCode={num}
+            delay={index * 0.3}
+            previousCode={previousCode[index]}
+          />
+        ))}
+      </div>
+      <div className={style["button-container"]}>
+        <Select
+          defaultValue="Chọn giải quay"
+          suffixIcon={
+            <TiArrowSortedDown size={20} color={eventSetting?.textColor} />
+          }
+          className={style["select-reward"]}
+          style={
+            {
+              "--selectBg": eventSetting?.buttonColor,
+              "--selectText": eventSetting?.textColor,
+            } as React.CSSProperties
+          }
+          options={rewardList?.map((item) => ({
+            value: item.rewardName,
+            label: item.rewardName,
+          }))}
+          onChange={(value) => {
+            const selectedRewardData = rewardList?.find(
+              (item) => item.rewardName === value
+            );
+            if (selectedRewardData) {
+              setSelectedReward(selectedRewardData.id);
+              // setRollingTurnsLeft(selectedRewardData.rollingNumber);
+              handleFetchSlotRoll(selectedRewardData.id);
+              handleChangeReward();
+            }
+          }}
+        />
+        <div
+          className={style["remaining-slot"]}
+          style={
+            {
+              "--buttonBg": eventSetting?.buttonColor,
+              "--buttonText": eventSetting?.textColor,
+            } as React.CSSProperties
+          }
+        >
+          <span>
+            {selectedReward === 0
+              ? "Chưa chọn giải quay"
+              : `Lượt quay còn lại: ${rollingTurns}`}
+          </span>
         </div>
-      </Modal>
-    </>
+        <button
+          onClick={spin}
+          style={
+            {
+              "--buttonBg": eventSetting?.buttonColor,
+              "--buttonText": eventSetting?.textColor,
+            } as React.CSSProperties
+          }
+          className={style["button"]}
+        >
+          Quay
+        </button>
+        {winner && (
+          <Button type="primary" onClick={handleSaveWinner}>
+            Lưu kết quả
+          </Button>
+        )}
+      </div>
+    </div>
   );
 };
 
